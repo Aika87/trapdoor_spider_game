@@ -27,6 +27,29 @@ void Animation::update(int row, float deltaTime)
 		}
 	}
 
+	
+
+	uvRect.left = currentImage.x * uvRect.width;
+	uvRect.top = currentImage.y * uvRect.height;
+}
+
+void Animation::update(int row, int col, float deltaTime)
+{
+	currentImage.y = row;
+	currentImage.x = col;
+	totalTime += deltaTime;
+
+	if (totalTime >= switchTime)
+	{
+		totalTime -= switchTime;
+		currentImage.x++;
+
+		if (currentImage.x >= imageCount.x)
+		{
+			currentImage.x = 0;
+		}
+	}
+
 	uvRect.left = currentImage.x * uvRect.width;
 	uvRect.top = currentImage.y * uvRect.height;
 }

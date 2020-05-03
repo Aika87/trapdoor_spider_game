@@ -9,6 +9,8 @@ public:
 
 	void update(int row, float deltaTime);
 
+	void update(int row, int col, float deltaTime); 
+
 	sf::IntRect uvRect; // rectangular subset of the texture
 
 private:

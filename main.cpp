@@ -5,7 +5,7 @@
 
 using std::cout;
 
-static const int WINDOW_WIDTH = 1600;
+static const int WINDOW_WIDTH = 1300;
 static const int WINDOW_HEIGHT = 900;
 
 int main()
@@ -19,14 +19,15 @@ int main()
 	bg.loadFromFile("png/background.png");
 	sf::Sprite bgSprite;
 	bgSprite.setTexture(bg);
-	bgSprite.setScale(10.0f, 10.0f);
+	bgSprite.setScale(8.0f, 10.0f);
 
 
 	sf::Texture lady;
 	lady.loadFromFile("png/lady.png");
 	sf::Sprite ladySprite;
 	ladySprite.setTexture(lady);
-	ladySprite.setScale(10.0f, 10.0f);
+	ladySprite.setScale(-10.0f, 10.0f);
+	ladySprite.setPosition(-50,600);
 
 	Animation animation(&lady, sf::Vector2u(3, 1), 0.3f);
 	float deltaTime = 0.0f;
@@ -36,13 +37,24 @@ int main()
 	beetle.loadFromFile("png/beetle.png");
 	sf::Sprite beetleSprite;
 	beetleSprite.setTexture(beetle);
-	beetleSprite.setScale(10.0f, 10.0f);
+	beetleSprite.setScale(-10.0f, 10.0f);
+	beetleSprite.setPosition(-250, 600); 
 
 	sf::Texture worm;
 	worm.loadFromFile("png/worm.png");
 	sf::Sprite wormSprite;
 	wormSprite.setTexture(worm);
-	wormSprite.setScale(10.0f, 10.0f);
+	wormSprite.setScale(-10.0f, 10.0f);
+	wormSprite.setPosition(-450, 600); 
+
+	sf::Texture health; 
+	health.loadFromFile("png/health.png"); 
+	sf::Sprite healthSprite; 
+	healthSprite.setTexture(health); 
+	healthSprite.setScale(10.0f, 10.0f); 
+	healthSprite.setPosition(50, 50); 
+
+	Animation healthAn(&health, sf::Vector2u(16, 1), 2.0f);
 
 	bool inLunge = false;
 
@@ -67,7 +79,8 @@ int main()
 						event.key.code == sf::Keyboard::A) &&
 						!inLunge)
 					{
-						inLunge = true;
+						//inLunge = true;
+						healthAn.update(0, 0, deltaTime);
 					}
 					if ((event.key.code == sf::Keyboard::Left ||
 						event.key.code == sf::Keyboard::A) &&
@@ -102,12 +115,33 @@ int main()
 		}
 
 		animation.update(0, deltaTime);
+
 		ladySprite.setTextureRect(animation.uvRect);
+
+
+		ladySprite.move(.3,0); 
+		
+
+		beetleSprite.setTextureRect(animation.uvRect); 
+
+		beetleSprite.move(.3, 0); 
+
+		wormSprite.setTextureRect(animation.uvRect); 
+
+		wormSprite.move(.3, 0);
+
+		healthAn.update(0, deltaTime); 
+
+		healthSprite.setTextureRect(healthAn.uvRect);
+
 
 		window.clear(sf::Color::Black);
 
 		window.draw(bgSprite);
 		window.draw(ladySprite);
+		window.draw(beetleSprite); 
+		window.draw(wormSprite); 
+		window.draw(healthSprite); 
 
 		window.display();
 	}

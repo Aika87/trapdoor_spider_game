@@ -2,6 +2,7 @@
 #include <SFML\Audio.hpp>
 #include <iostream>
 #include "Animation.h"
+#include "RandomMove.h"
 
 using std::cout;
 
@@ -112,15 +113,16 @@ int main()
 					}
 
 			}
+
 		}
 
 		animation.update(0, deltaTime);
 
 		ladySprite.setTextureRect(animation.uvRect);
 
-
 		ladySprite.move(.3,0); 
-		
+
+		randomMove(&ladySprite, deltaTime); 
 
 		beetleSprite.setTextureRect(animation.uvRect); 
 
@@ -133,7 +135,6 @@ int main()
 		healthAn.update(0, deltaTime); 
 
 		healthSprite.setTextureRect(healthAn.uvRect);
-
 
 		window.clear(sf::Color::Black);
 

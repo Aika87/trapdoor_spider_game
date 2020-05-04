@@ -2,60 +2,137 @@
 #include <SFML\Audio.hpp>
 #include <iostream>
 #include "Animation.h"
-#include "RandomMove.h"
+#include "Bug.h"
 
 using std::cout;
 
-static const int WINDOW_WIDTH = 1300;
-static const int WINDOW_HEIGHT = 900;
+static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().width / 3;
+static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
 
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Trapdoor", sf::Style::Default);
 	window.setVerticalSyncEnabled(true);
 
-	// Sprites to do: Spider, energy bar
-
 	sf::Texture bg;
 	bg.loadFromFile("png/background.png");
 	sf::Sprite bgSprite;
 	bgSprite.setTexture(bg);
-	bgSprite.setScale(8.0f, 10.0f);
+	unsigned int bgx = bg.getSize().x;
+	unsigned int bgy = bg.getSize().y;
+	float widthRatio = float(WINDOW_WIDTH / bgx);
+	float heightRatio = float(WINDOW_HEIGHT / bgy);
+	bgSprite.setScale(1.0f * widthRatio, 1.0f * heightRatio);
 
+	//Path Points
+	Point pointA(10.0f * widthRatio, 50.0f * heightRatio),
+		pointB(47.0f * widthRatio, 43.0f * heightRatio),
+		pointC(130.0f * widthRatio, 42.0f * heightRatio),
+		pointD(146.0f * widthRatio, 31.0f * heightRatio),
+		pointE(39.0f * widthRatio, 65.0f * heightRatio),
+		pointF(72.0f * widthRatio, 75.0f * heightRatio),
+		pointG(85.0f * widthRatio, 62.0f * heightRatio),
+		pointH(115.0f * widthRatio, 65.0f * heightRatio),
+		pointI(137.0f * widthRatio, 60.0f * heightRatio),
+		pointJ(30.0f * widthRatio, 78.0f * heightRatio),
+		pointK(145.0f * widthRatio, 76.0f * heightRatio),
+		pointS1(-20.0f * widthRatio, 45.0f * heightRatio),
+		pointS2(26.0f * widthRatio, 110.0f * heightRatio),
+		pointS3(51.0f * widthRatio, 110.0f * heightRatio),
+		pointS4(95.0f * widthRatio, 110.0f * heightRatio),
+		pointS5(135.0f * widthRatio, 110.0f * heightRatio),
+		pointS6(180.0f * widthRatio, 70.0f * heightRatio),
+		pointS7(180.0f * widthRatio, 42.0f * heightRatio);
+
+	//path connections
+	pointS1.connect(pointA);
+
+	pointA.connect(pointS1);
+	pointA.connect(pointB);
+	pointA.connect(pointE);
+	pointA.connect(pointJ);
+	pointA.connect(pointS2);
+
+	pointB.connect(pointA);
+	pointB.connect(pointE);
+	pointB.connect(pointF);
+	pointB.connect(pointG);
+	pointB.connect(pointC);
+
+	pointC.connect(pointB);
+	pointC.connect(pointD);
+	pointC.connect(pointH);
+	pointC.connect(pointI);
+
+	pointD.connect(pointC);
+	pointD.connect(pointI);
+	pointD.connect(pointK);
+	pointD.connect(pointS7);
+
+	pointE.connect(pointA);
+	pointE.connect(pointB);
+	pointE.connect(pointF);
+	pointE.connect(pointJ);
+
+	pointF.connect(pointB);
+	pointF.connect(pointE);
+	pointF.connect(pointG);
+	pointF.connect(pointJ);
+	pointF.connect(pointS3);
+	pointF.connect(pointS4);
+
+	pointG.connect(pointB);
+	pointG.connect(pointF);
+	pointG.connect(pointH);
+	pointG.connect(pointS4);
+
+	pointH.connect(pointG);
+	pointH.connect(pointC);
+	pointH.connect(pointI);
+	pointH.connect(pointS4);
+	pointH.connect(pointS5);
+
+	pointI.connect(pointC);
+	pointI.connect(pointH);
+	pointI.connect(pointD);
+	pointI.connect(pointK);
+	pointI.connect(pointS5);
+
+	pointJ.connect(pointA);
+	pointJ.connect(pointE);
+	pointJ.connect(pointF);
+	pointJ.connect(pointS2);
+	pointJ.connect(pointS3);
+
+	// edges within range: B to E, B to F, B to G, G to F, G to S4, G to H,
+	// H to C, H to S4, H to I, H to S5, D to I
 
 	sf::Texture lady;
 	lady.loadFromFile("png/lady.png");
 	sf::Sprite ladySprite;
 	ladySprite.setTexture(lady);
-	ladySprite.setScale(-10.0f, 10.0f);
-	ladySprite.setPosition(-50,600);
-
-	Animation animation(&lady, sf::Vector2u(3, 1), 0.3f);
-	float deltaTime = 0.0f;
-	sf::Clock clock;
+	ladySprite.setScale(5.0f, 5.0f);
+	ladySprite.setPosition(pointI.getPosition());
 
 	sf::Texture beetle;
 	beetle.loadFromFile("png/beetle.png");
 	sf::Sprite beetleSprite;
 	beetleSprite.setTexture(beetle);
-	beetleSprite.setScale(-10.0f, 10.0f);
-	beetleSprite.setPosition(-250, 600); 
+	beetleSprite.setScale(5.0f, 5.0f);
+	beetleSprite.setPosition(pointE.getPosition());
 
 	sf::Texture worm;
 	worm.loadFromFile("png/worm.png");
 	sf::Sprite wormSprite;
 	wormSprite.setTexture(worm);
-	wormSprite.setScale(-10.0f, 10.0f);
-	wormSprite.setPosition(-450, 600); 
+	wormSprite.setScale(5.0f, 5.0f);
+	wormSprite.setPosition(pointA.getPosition());
 
-	sf::Texture health; 
-	health.loadFromFile("png/health.png"); 
-	sf::Sprite healthSprite; 
-	healthSprite.setTexture(health); 
-	healthSprite.setScale(10.0f, 10.0f); 
-	healthSprite.setPosition(50, 50); 
-
-	Animation healthAn(&health, sf::Vector2u(16, 1), 2.0f);
+	Animation animationLady(&lady, sf::Vector2u(4, 1), 0.3f);
+	Animation animationBeetle(&beetle, sf::Vector2u(3, 1), 0.05f);
+	Animation animationWorm(&worm, sf::Vector2u(4, 1), 0.5f);
+	float deltaTime = 0.0f;
+	sf::Clock clock;
 
 	bool inLunge = false;
 
@@ -80,8 +157,7 @@ int main()
 						event.key.code == sf::Keyboard::A) &&
 						!inLunge)
 					{
-						//inLunge = true;
-						healthAn.update(0, 0, deltaTime);
+						inLunge = true;
 					}
 					if ((event.key.code == sf::Keyboard::Left ||
 						event.key.code == sf::Keyboard::A) &&
@@ -113,36 +189,21 @@ int main()
 					}
 
 			}
-
 		}
 
-		animation.update(0, deltaTime);
-
-		ladySprite.setTextureRect(animation.uvRect);
-
-		ladySprite.move(.3,0); 
-
-		randomMove(&ladySprite, deltaTime); 
-
-		beetleSprite.setTextureRect(animation.uvRect); 
-
-		beetleSprite.move(.3, 0); 
-
-		wormSprite.setTextureRect(animation.uvRect); 
-
-		wormSprite.move(.3, 0);
-
-		healthAn.update(0, deltaTime); 
-
-		healthSprite.setTextureRect(healthAn.uvRect);
+		animationLady.update(0, deltaTime, true);
+		animationBeetle.update(0, deltaTime, false);
+		animationWorm.update(0, deltaTime, false);
+		ladySprite.setTextureRect(animationLady.uvRect);
+		beetleSprite.setTextureRect(animationBeetle.uvRect);
+		wormSprite.setTextureRect(animationWorm.uvRect);
 
 		window.clear(sf::Color::Black);
 
 		window.draw(bgSprite);
 		window.draw(ladySprite);
-		window.draw(beetleSprite); 
-		window.draw(wormSprite); 
-		window.draw(healthSprite); 
+		window.draw(beetleSprite);
+		window.draw(wormSprite);
 
 		window.display();
 	}

@@ -7,9 +7,7 @@ public:
 	Animation(sf::Texture* texture, sf::Vector2u imageCount, float switchTime);
 	~Animation();
 
-	void update(int row, float deltaTime);
-
-	void update(int row, int col, float deltaTime); 
+	void update(int row, float deltaTime, bool faceRight);
 
 	sf::IntRect uvRect; // rectangular subset of the texture
 

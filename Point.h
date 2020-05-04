@@ -10,11 +10,12 @@ public:
 	Point(float x, float y);
 	sf::Vector2f getPosition();
 	void setPosition(float x, float y);
-	void connect(const Point& point); 
+	void connect(const Point& point);
+	const Point* getRandomConnection();
 
 private:
 	sf::Vector2f position;
-	const Point *connections[CONNECTION_CAP];
+	const Point* connections[CONNECTION_CAP];
 	int connCount;
 
 	friend class Bug;

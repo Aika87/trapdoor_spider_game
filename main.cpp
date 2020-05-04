@@ -104,6 +104,13 @@ int main()
 	pointJ.connect(pointS2);
 	pointJ.connect(pointS3);
 
+	Point* pointArray[] = 
+	{ 
+		&pointA, &pointB, &pointC, &pointD, &pointE, &pointF, &pointG, &pointH, 
+		&pointI, &pointJ, &pointK,
+		&pointS1, &pointS2, &pointS3, &pointS4, &pointS5, &pointS6, &pointS7
+	};
+
 	// edges within range: B to E, B to F, B to G, G to F, G to S4, G to H,
 	// H to C, H to S4, H to I, H to S5, D to I
 
@@ -135,6 +142,12 @@ int main()
 	sf::Clock clock;
 
 	bool inLunge = false;
+
+	for (int i = 0; i < 18; ++i)
+	{
+		cout << pointArray[i]->getPosition().x;
+		cout << "\n";
+	}
 
 	while (window.isOpen())
 	{

@@ -1,6 +1,6 @@
 #include "Point.h"
 
-Point::Point(sf::Vector2f& position)
+Point::Point(const sf::Vector2f& position)
 {
 	this->position = position;
 	connCount = 0;
@@ -26,4 +26,12 @@ void Point::connect(const Point& point)
 {
 	connections[connCount] = &point;
 	connCount++;
+}
+
+const Point* Point::getRandomConnection()
+{
+	srand(unsigned int(time(NULL)));
+	int n = rand() % connCount;
+
+	return connections[n];
 }

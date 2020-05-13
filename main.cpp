@@ -1,7 +1,6 @@
 #include <SFML\Graphics.hpp>
 #include <SFML\Audio.hpp>
 #include <iostream>
-#include "Animation.h"
 #include "Bug.h"
 
 using std::cout;
@@ -20,138 +19,133 @@ int main()
 	bgSprite.setTexture(bg);
 	unsigned int bgx = bg.getSize().x;
 	unsigned int bgy = bg.getSize().y;
-	float widthRatio = float(WINDOW_WIDTH / bgx);
-	float heightRatio = float(WINDOW_HEIGHT / bgy);
+	float widthRatio = 1.0f * WINDOW_WIDTH / bgx;
+	float heightRatio = 1.0f * WINDOW_HEIGHT / bgy;
 	bgSprite.setScale(1.0f * widthRatio, 1.0f * heightRatio);
 
-	//Path Points
-	Point pointA(10.0f * widthRatio, 50.0f * heightRatio),
-		pointB(47.0f * widthRatio, 43.0f * heightRatio),
-		pointC(130.0f * widthRatio, 42.0f * heightRatio),
-		pointD(146.0f * widthRatio, 31.0f * heightRatio),
-		pointE(39.0f * widthRatio, 65.0f * heightRatio),
-		pointF(72.0f * widthRatio, 75.0f * heightRatio),
-		pointG(85.0f * widthRatio, 62.0f * heightRatio),
-		pointH(115.0f * widthRatio, 65.0f * heightRatio),
-		pointI(137.0f * widthRatio, 60.0f * heightRatio),
-		pointJ(30.0f * widthRatio, 78.0f * heightRatio),
-		pointK(145.0f * widthRatio, 76.0f * heightRatio),
-		pointS1(-20.0f * widthRatio, 45.0f * heightRatio),
-		pointS2(26.0f * widthRatio, 110.0f * heightRatio),
-		pointS3(51.0f * widthRatio, 110.0f * heightRatio),
-		pointS4(95.0f * widthRatio, 110.0f * heightRatio),
-		pointS5(135.0f * widthRatio, 110.0f * heightRatio),
-		pointS6(180.0f * widthRatio, 70.0f * heightRatio),
-		pointS7(180.0f * widthRatio, 42.0f * heightRatio);
+	srand(unsigned int(time(NULL))); // initialize random int generator
+
+	Point allPoints[18]
+	{
+		{10.0f * widthRatio, 50.0f * heightRatio}, //A
+		{47.0f * widthRatio, 43.0f * heightRatio}, //B
+		{130.0f * widthRatio, 42.0f * heightRatio}, //C
+		{146.0f * widthRatio, 31.0f * heightRatio}, //D
+		{39.0f * widthRatio, 65.0f * heightRatio}, //E
+		{72.0f * widthRatio, 75.0f * heightRatio}, //F
+		{85.0f * widthRatio, 62.0f * heightRatio}, //G
+		{115.0f * widthRatio, 65.0f * heightRatio}, //H
+		{137.0f * widthRatio, 60.0f * heightRatio}, //I
+		{30.0f * widthRatio, 78.0f * heightRatio}, //J
+		{145.0f * widthRatio, 76.0f * heightRatio}, //K
+		{-20.0f * widthRatio, 45.0f * heightRatio}, //S1
+		{26.0f * widthRatio, 110.0f * heightRatio}, //S2
+		{51.0f * widthRatio, 110.0f * heightRatio}, //S3
+		{95.0f * widthRatio, 110.0f * heightRatio}, //S4
+		{135.0f * widthRatio, 110.0f * heightRatio}, //S5
+		{180.0f * widthRatio, 70.0f * heightRatio}, //S6
+		{180.0f * widthRatio, 42.0f * heightRatio} //S7
+	};
 
 	//path connections
-	pointS1.connect(pointA);
+	allPoints[0].connect(allPoints[1]);
+	allPoints[0].connect(allPoints[4]);
+	allPoints[0].connect(allPoints[9]);
+	allPoints[0].connect(allPoints[11]);
 
-	pointA.connect(pointS1);
-	pointA.connect(pointB);
-	pointA.connect(pointE);
-	pointA.connect(pointJ);
-	pointA.connect(pointS2);
+	allPoints[1].connect(allPoints[0]);
+	allPoints[1].connect(allPoints[4]);
+	allPoints[1].connect(allPoints[5]);
+	allPoints[1].connect(allPoints[6]);
+	allPoints[1].connect(allPoints[2]);
+	allPoints[1].connect(allPoints[11]);
 
-	pointB.connect(pointA);
-	pointB.connect(pointE);
-	pointB.connect(pointF);
-	pointB.connect(pointG);
-	pointB.connect(pointC);
+	allPoints[2].connect(allPoints[1]);
+	allPoints[2].connect(allPoints[3]);
+	allPoints[2].connect(allPoints[7]);
+	allPoints[2].connect(allPoints[8]);
+	allPoints[2].connect(allPoints[16]);
 
-	pointC.connect(pointB);
-	pointC.connect(pointD);
-	pointC.connect(pointH);
-	pointC.connect(pointI);
+	allPoints[3].connect(allPoints[2]);
+	allPoints[3].connect(allPoints[8]);
+	allPoints[3].connect(allPoints[10]);
+	allPoints[3].connect(allPoints[17]);
 
-	pointD.connect(pointC);
-	pointD.connect(pointI);
-	pointD.connect(pointK);
-	pointD.connect(pointS7);
+	allPoints[4].connect(allPoints[0]);
+	allPoints[4].connect(allPoints[1]);
+	allPoints[4].connect(allPoints[5]);
+	allPoints[4].connect(allPoints[9]);
+	allPoints[4].connect(allPoints[12]);
 
-	pointE.connect(pointA);
-	pointE.connect(pointB);
-	pointE.connect(pointF);
-	pointE.connect(pointJ);
+	allPoints[5].connect(allPoints[1]);
+	allPoints[5].connect(allPoints[4]);
+	allPoints[5].connect(allPoints[6]);
+	allPoints[5].connect(allPoints[9]);
+	allPoints[5].connect(allPoints[13]);
 
-	pointF.connect(pointB);
-	pointF.connect(pointE);
-	pointF.connect(pointG);
-	pointF.connect(pointJ);
-	pointF.connect(pointS3);
-	pointF.connect(pointS4);
+	allPoints[6].connect(allPoints[1]);
+	allPoints[6].connect(allPoints[5]);
+	allPoints[6].connect(allPoints[7]);
+	allPoints[6].connect(allPoints[14]);
 
-	pointG.connect(pointB);
-	pointG.connect(pointF);
-	pointG.connect(pointH);
-	pointG.connect(pointS4);
+	allPoints[7].connect(allPoints[6]);
+	allPoints[7].connect(allPoints[2]);
+	allPoints[7].connect(allPoints[8]);
+	allPoints[7].connect(allPoints[14]);
 
-	pointH.connect(pointG);
-	pointH.connect(pointC);
-	pointH.connect(pointI);
-	pointH.connect(pointS4);
-	pointH.connect(pointS5);
+	allPoints[8].connect(allPoints[2]);
+	allPoints[8].connect(allPoints[7]);
+	allPoints[8].connect(allPoints[3]);
+	allPoints[8].connect(allPoints[10]);
+	allPoints[8].connect(allPoints[15]);
 
-	pointI.connect(pointC);
-	pointI.connect(pointH);
-	pointI.connect(pointD);
-	pointI.connect(pointK);
-	pointI.connect(pointS5);
+	allPoints[9].connect(allPoints[0]);
+	allPoints[9].connect(allPoints[4]);
+	allPoints[9].connect(allPoints[5]);
+	allPoints[9].connect(allPoints[13]);
 
-	pointJ.connect(pointA);
-	pointJ.connect(pointE);
-	pointJ.connect(pointF);
-	pointJ.connect(pointS2);
-	pointJ.connect(pointS3);
+	allPoints[10].connect(allPoints[3]);
+	allPoints[10].connect(allPoints[8]);
+	allPoints[10].connect(allPoints[15]);
 
-	Point* pointArray[] = 
-	{ 
-		&pointA, &pointB, &pointC, &pointD, &pointE, &pointF, &pointG, &pointH, 
-		&pointI, &pointJ, &pointK,
-		&pointS1, &pointS2, &pointS3, &pointS4, &pointS5, &pointS6, &pointS7
-	};
+	allPoints[11].connect(allPoints[0]);
+	allPoints[11].connect(allPoints[1]);
+
+	allPoints[12].connect(allPoints[4]);
+
+	allPoints[13].connect(allPoints[9]);
+	allPoints[13].connect(allPoints[5]);
+
+	allPoints[14].connect(allPoints[6]);
+	allPoints[14].connect(allPoints[7]);
+
+	allPoints[15].connect(allPoints[8]);
+	allPoints[15].connect(allPoints[10]);
+
+	allPoints[16].connect(allPoints[2]);
+
+	allPoints[17].connect(allPoints[3]);
 
 	// edges within range: B to E, B to F, B to G, G to F, G to S4, G to H,
 	// H to C, H to S4, H to I, H to S5, D to I
 
-	sf::Texture lady;
-	lady.loadFromFile("png/lady.png");
-	sf::Sprite ladySprite;
-	ladySprite.setTexture(lady);
-	ladySprite.setScale(5.0f, 5.0f);
-	ladySprite.setPosition(pointI.getPosition());
+	sf::Texture bugTexture;
+	bugTexture.loadFromFile("png/bugs.png");
 
-	sf::Texture beetle;
-	beetle.loadFromFile("png/beetle.png");
-	sf::Sprite beetleSprite;
-	beetleSprite.setTexture(beetle);
-	beetleSprite.setScale(5.0f, 5.0f);
-	beetleSprite.setPosition(pointE.getPosition());
+	Bug bug0(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
+	Bug bug1(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
+	Bug bug2(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
+	std::cout << bug0 << bug1 << bug2;
 
-	sf::Texture worm;
-	worm.loadFromFile("png/worm.png");
-	sf::Sprite wormSprite;
-	wormSprite.setTexture(worm);
-	wormSprite.setScale(5.0f, 5.0f);
-	wormSprite.setPosition(pointA.getPosition());
-
-	Animation animationLady(&lady, sf::Vector2u(4, 1), 0.3f);
-	Animation animationBeetle(&beetle, sf::Vector2u(3, 1), 0.05f);
-	Animation animationWorm(&worm, sf::Vector2u(4, 1), 0.5f);
 	float deltaTime = 0.0f;
-	sf::Clock clock;
+	sf::Clock deltaClock;
+	sf::Clock spawnClock;
 
 	bool inLunge = false;
 
-	for (int i = 0; i < 18; ++i)
-	{
-		cout << pointArray[i]->getPosition().x;
-		cout << "\n";
-	}
-
 	while (window.isOpen())
 	{
-		deltaTime = clock.restart().asSeconds();
+		deltaTime = deltaClock.restart().asSeconds();
 
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -204,19 +198,26 @@ int main()
 			}
 		}
 
-		animationLady.update(0, deltaTime, true);
-		animationBeetle.update(0, deltaTime, false);
-		animationWorm.update(0, deltaTime, false);
-		ladySprite.setTextureRect(animationLady.uvRect);
-		beetleSprite.setTextureRect(animationBeetle.uvRect);
-		wormSprite.setTextureRect(animationWorm.uvRect);
+
+		bug0.update(allPoints, deltaTime);
+		bug1.update(allPoints, deltaTime);
+		bug2.update(allPoints, deltaTime);
 
 		window.clear(sf::Color::Black);
 
 		window.draw(bgSprite);
-		window.draw(ladySprite);
-		window.draw(beetleSprite);
-		window.draw(wormSprite);
+
+		sf::RectangleShape rect(sf::Vector2f(5.0f, 5.0f));
+		rect.setFillColor(sf::Color::Red);
+		for (int i = 0; i < 18; ++i)
+		{
+			rect.setPosition(allPoints[i].getPosition());
+			window.draw(rect);
+		}
+
+		bug0.draw(window);
+		bug1.draw(window);
+		bug2.draw(window);
 
 		window.display();
 	}

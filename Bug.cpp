@@ -88,10 +88,14 @@ Bug::~Bug()
 
 void Bug::update(const Point* pointArray, float deltaTime)
 {
-	float destX = (*destination)->getPosition().x;
-	float destY = (*destination)->getPosition().y;
-	float curPointX = (*current)->getPosition().x;
-	float curPointY = (*current)->getPosition().y;
+	//sprite radius
+	float radiusX = body.getGlobalBounds().width / 2.0f;
+	float radiusY = body.getGlobalBounds().height / 2.0f;
+
+	float destX = (*destination)->getPosition().x - radiusX;
+	float destY = (*destination)->getPosition().y - radiusY;
+	float curPointX = (*current)->getPosition().x - radiusX;
+	float curPointY = (*current)->getPosition().y - radiusY;
 
 	if (body.getGlobalBounds().contains((*destination)->getPosition()))
 	{
@@ -106,8 +110,8 @@ void Bug::update(const Point* pointArray, float deltaTime)
 			current = destination;
 			destination++;
 		}
-			destX = (*destination)->getPosition().x;
-			destY = (*destination)->getPosition().y;
+			destX = (*destination)->getPosition().x - radiusX;
+			destY = (*destination)->getPosition().y - radiusY;
 	}
 
 	sf::Vector2f distance(0.0f, 0.0f);
@@ -118,10 +122,6 @@ void Bug::update(const Point* pointArray, float deltaTime)
 	{
 		faceRight = false;
 	}
-	
-	sf::Vector2f movement(0.0f, 0.0f);
-	movement.x += speed * deltaTime;
-	movement.y += speed * deltaTime;
 
 	animation.update(row, deltaTime, faceRight);
 	body.setTextureRect(animation.uvRect);
@@ -230,7 +230,14 @@ void Bug::buildPath(const Point* pointArray, int dangerCode) // [0-10] are A-K, 
 	current = path.begin();
 	destination = ++path.begin();
 
-	body.setPosition(path.front()->getPosition());
+	body.setPosition(path.front()->getPosition().x - body.getGlobalBounds().width / 2.0f,
+		path.front()->getPosition().y - body.getGlobalBounds().height / 2.0f);
+}
+
+void Bug::setPath(std::list<const Point*> path)
+{
+	path.clear();
+	this->path = path;
 }
 
 int Bug::getHealth() const
@@ -258,17 +265,19 @@ std::ostream& operator<<(std::ostream& out, const Bug& c)
 		break;
 	}
 	out << std::endl;
+	out << "Health: " << c.health << std::endl;
+	out << "Speed: " << c.speed << std::endl;
 	out << "Path: ";
 
 	auto i = c.current;
 	while (next(next(i)) !=c.path.end())
 	{
-		out << "(" << (*i)->getPosition().x << ", " << (*i)->getPosition().y << ") -> ";
+		out << (*i)->getName() << "(" << (*i)->getPosition().x << ", " << (*i)->getPosition().y << ") -> ";
 		++i;
 	}
 
 	++i;
-	out << "(" << (*i)->getPosition().x << ", " << (*i)->getPosition().y << ")";
+	out << (*i)->getName() << "(" << (*i)->getPosition().x << ", " << (*i)->getPosition().y << ")";
 
 	out << std::endl;
 

@@ -1,18 +1,20 @@
 #include "Point.h"
 
-Point::Point(const sf::Vector2f& position)
+Point::Point(const sf::Vector2f& position, char name)
 {
 	this->position = position;
+	this->name = name;
 	connCount = 0;
 }
 
-Point::Point(float x, float y)
+Point::Point(float x, float y, char name)
 {
+	this->name = name;
 	position = sf::Vector2f(x, y);
 	connCount = 0;
 }
 
-sf::Vector2f Point::getPosition()
+sf::Vector2f Point::getPosition() const
 {
 	return position;
 }
@@ -28,10 +30,15 @@ void Point::connect(const Point& point)
 	connCount++;
 }
 
-const Point* Point::getRandomConnection()
+const Point* Point::getRandomConnection() const
 {
 	srand(unsigned int(time(NULL)));
-	int n = rand() % connCount;
+	int n = rand() % (connCount - 1);
 
 	return connections[n];
+}
+
+const Point* Point::getExit() const
+{
+	return connections[connCount - 1];
 }

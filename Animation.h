@@ -8,6 +8,8 @@ public:
 	~Animation();
 
 	void update(int row, float deltaTime, bool faceRight);
+	sf::Vector2u getCurrentImage() const;
+	void setCurrentImage(sf::Vector2u rect);
 
 	sf::IntRect uvRect; // rectangular subset of the texture
 

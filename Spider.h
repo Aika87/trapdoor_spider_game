@@ -18,6 +18,10 @@ public:
 	void update(float deltaTime);
 	void lunge(float deltaTime);
 
+	void draw(sf::RenderWindow& window);
+	void setScale(float x, float y) { body.setScale(x, y); };
+	void setPosition(float x, float y) { body.setPosition(x, y); };
+
 
 private:
 	sf::Sprite body;

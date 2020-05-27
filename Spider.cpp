@@ -4,7 +4,9 @@ Spider::Spider(sf::Texture* texture, sf::Vector2u imageCount,
 	float switchTime) :
 	animation(texture, imageCount, switchTime)
 {
-	row = 0;
+	row = 2;
+
+	body.setTexture(*texture);
 }
 
 void Spider::update(float deltaTime)
@@ -26,9 +28,21 @@ void Spider::update(float deltaTime)
 	{
 		lunge(deltaTime);
 	}
+
+	animation.update(row, deltaTime, false);
+	body.setTextureRect(animation.uvRect);
+}
+
+void Spider::draw(sf::RenderWindow& window)
+{
+	window.draw(body);
 }
 
 void Spider::lunge(float deltaTime)
 {
+	animation.update(row, deltaTime, false);
+}
 
+Spider::~Spider()
+{
 }

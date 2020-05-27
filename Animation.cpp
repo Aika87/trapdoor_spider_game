@@ -41,6 +41,16 @@ void Animation::update(int row, float deltaTime, bool faceRight)
 	}
 }
 
+sf::Vector2u Animation::getCurrentImage() const
+{
+	return currentImage;
+}
+
+void Animation::setCurrentImage(sf::Vector2u rect)
+{
+	currentImage = rect;
+}
+
 Animation::~Animation()
 {
 }

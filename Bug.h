@@ -29,13 +29,20 @@ public:
 	void draw(sf::RenderWindow& window);
 
 	/**
-		creates a path for the bug to follow
+		creates a random path for the bug to follow
 
 		@param pointArray an array of all points
 		@param dangerCode a random number that chooses the segment within the 
 		range of the spider
 	*/
 	void buildPath(const Point* pointArray, int dangerCode);
+
+	/**
+		creates a path from the given list of points
+
+		@param pointArray an array of the desired points
+	*/
+	void setPath(std::list<const Point*> path);
 
 	/**
 		returns the amount of health the bug will add to the spider when caught

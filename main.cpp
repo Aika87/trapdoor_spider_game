@@ -131,6 +131,8 @@ int main()
 	sf::Texture bugTexture;
 	bugTexture.loadFromFile("png/bugs.png");
 
+	// create a vector containing all the 
+
 	Bug bug0(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
 	Bug bug1(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
 	Bug bug2(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
@@ -149,15 +151,17 @@ int main()
 
 	sf::Texture spiderTexture;
 	spiderTexture.loadFromFile("png/spider.png");
-	Spider spider(&spiderTexture, sf::Vector2u(6, 5), 0.1f);
+	Spider spider(&spiderTexture, sf::Vector2u(6, 5), 0.05f);
 	spider.setPosition(WINDOW_WIDTH * 9.0f / 40.0f, WINDOW_HEIGHT * 12.0f / 45.0f);
 	spider.setScale(widthRatio, heightRatio);
 
 	float deltaTime = 0.0f;
 	sf::Clock deltaClock; // time between frames
 	sf::Clock spawnClock; // time between bugs spawning
+	sf::Clock healthClock; // time between health decrements
 
-	bool inLunge = false;
+	bool inLunge = false; // whether or not the spider is lunging
+	bool delayed = false; // whether or not the spider's switch time is delayed (making retraction slower)
 
 	while (window.isOpen())
 	{
@@ -179,35 +183,19 @@ int main()
 					}
 					if ((event.key.code == sf::Keyboard::Left || 
 						event.key.code == sf::Keyboard::A) &&
+						spider.getRow() > 0 &&
 						!inLunge)
 					{
-						inLunge = true;
-					}
-					if ((event.key.code == sf::Keyboard::Left ||
-						event.key.code == sf::Keyboard::A) &&
-						(event.key.code == sf::Keyboard::Down ||
-						event.key.code == sf::Keyboard::S) &&
-						!inLunge)
-					{
-						inLunge = true;
-					}
-					if ((event.key.code == sf::Keyboard::Down ||
-						event.key.code == sf::Keyboard::S) &&
-						!inLunge)
-					{
-						inLunge = true;
-					}
-					if ((event.key.code == sf::Keyboard::Down ||
-						event.key.code == sf::Keyboard::S) &&
-						(event.key.code == sf::Keyboard::Right ||
-						event.key.code == sf::Keyboard::D) &&
-						!inLunge)
-					{
-						inLunge = true;
+						spider.shift(-1);
 					}
 					if ((event.key.code == sf::Keyboard::Right ||
 						event.key.code == sf::Keyboard::D) &&
+						spider.getRow() < 4 &&
 						!inLunge)
+					{
+						spider.shift(1);
+					}
+					if (event.key.code == sf::Keyboard::Space)
 					{
 						inLunge = true;
 					}
@@ -215,14 +203,33 @@ int main()
 			}
 		}
 
-		spider.update(deltaTime);
+		window.clear();
+		
+		
+		if (inLunge)
+		{ 
+			inLunge = spider.lunge(deltaTime, &delayed);
+			// decrement health here 
+			// check if bug is caught
+		}
+
+		if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
+		{
+			healthClock.restart();
+			//decrement health here
+		}
+
+		if (spawnClock.getElapsedTime().asSeconds() >= 3.0f) // spawn new bug every three seconds when they get under a certain population
+		{
+			spawnClock.restart();
+			// spawn new bug
+		}
+
 		bug0.update(allPoints, deltaTime);
 		bug1.update(allPoints, deltaTime);
 		bug2.update(allPoints, deltaTime);
 		bug3.update(allPoints, deltaTime);
 		bug4.update(allPoints, deltaTime);
-
-		window.clear(sf::Color::Black);
 
 		window.draw(bgSprite);
 

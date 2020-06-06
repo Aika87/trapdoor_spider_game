@@ -153,7 +153,7 @@ int main()
 	sf::Texture spiderTexture;
 	spiderTexture.loadFromFile("png/spider.png");
 	Spider spider(&spiderTexture, sf::Vector2u(6, 5), 0.05f);
-	spider.setPosition(WINDOW_WIDTH * 9.0f / 40.0f, WINDOW_HEIGHT * 12.0f / 45.0f);
+	spider.setPosition(WINDOW_WIDTH * 34.0f / 160.0f, WINDOW_HEIGHT * 12.0f / 45.0f);
 	spider.setScale(widthRatio, heightRatio);
 
 	sf::Texture healthTexture;

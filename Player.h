@@ -1,7 +1,9 @@
 #pragma once
+#include "Points.h"
 #include <SFML\Graphics.hpp>
 #include "Animation.h"
 #include <map>
+
 
 class Player
 {
@@ -15,7 +17,7 @@ public:
 
 private: 
 
-	void randomMove(std::map <int, int>::iterator iter, int count, float deltaTime);
+	void randomMove(std::vector <Points>::iterator iter, int count, float deltaTime);
 
 	//sf::RectangleShape body; 
 	sf::Sprite body; 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Bug.h"
 #include "Spider.h"
+#include "HealthBar.h"
 
 using std::cout;
 
@@ -131,7 +132,7 @@ int main()
 	sf::Texture bugTexture;
 	bugTexture.loadFromFile("png/bugs.png");
 
-	// create a vector containing all the 
+	// create a vector containing all the bugs
 
 	Bug bug0(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
 	Bug bug1(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
@@ -155,13 +156,19 @@ int main()
 	spider.setPosition(WINDOW_WIDTH * 9.0f / 40.0f, WINDOW_HEIGHT * 12.0f / 45.0f);
 	spider.setScale(widthRatio, heightRatio);
 
+	sf::Texture healthTexture;
+	healthTexture.loadFromFile("png/health.png");
+	HealthBar health(&healthTexture, sf::Vector2u(16, 1), 20.0f);
+	health.setPosition(WINDOW_WIDTH / 32.0f, WINDOW_HEIGHT / 18.0f);
+	health.setScale(widthRatio, heightRatio);
+
 	float deltaTime = 0.0f;
 	sf::Clock deltaClock; // time between frames
 	sf::Clock spawnClock; // time between bugs spawning
 	sf::Clock healthClock; // time between health decrements
 
-	bool inLunge = false; // whether or not the spider is lunging
-	bool delayed = false; // whether or not the spider's switch time is delayed (making retraction slower)
+	bool inLunge = false; // spider is currently lunging (triggers lunge animation)
+	bool delayed = false; // spider's switchTime has been extended
 
 	while (window.isOpen())
 	{
@@ -198,6 +205,7 @@ int main()
 					if (event.key.code == sf::Keyboard::Space)
 					{
 						inLunge = true;
+						health.update(-1, deltaTime);
 					}
 
 			}
@@ -209,14 +217,13 @@ int main()
 		if (inLunge)
 		{ 
 			inLunge = spider.lunge(deltaTime, &delayed);
-			// decrement health here 
 			// check if bug is caught
 		}
 
 		if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
 		{
 			healthClock.restart();
-			//decrement health here
+			health.update(-1, deltaTime);
 		}
 
 		if (spawnClock.getElapsedTime().asSeconds() >= 3.0f) // spawn new bug every three seconds when they get under a certain population
@@ -232,16 +239,7 @@ int main()
 		bug4.update(allPoints, deltaTime);
 
 		window.draw(bgSprite);
-
-		// Place red dot at each point
-		sf::RectangleShape rect(sf::Vector2f(5.0f, 5.0f));
-		rect.setFillColor(sf::Color::Red);
-		for (int i = 0; i < 18; ++i)
-		{
-			rect.setPosition(allPoints[i].getPosition());
-			window.draw(rect);
-		}
-
+		health.draw(window);
 		spider.draw(window);
 		bug0.draw(window);
 

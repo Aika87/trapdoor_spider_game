@@ -10,6 +10,8 @@ public:
 	void update(int row, float deltaTime, bool faceRight);
 	sf::Vector2u getCurrentImage() const;
 	void setCurrentImage(sf::Vector2u rect);
+	float getSwitchTime() const;
+	void setSwitchTime(float switchTime);
 
 	sf::IntRect uvRect; // rectangular subset of the texture
 
@@ -18,5 +20,6 @@ private:
 	sf::Vector2u currentImage;
 	float totalTime;
 	float switchTime; // time to switch between frames
+	bool loop; // whether the animation loops (bug walking) or plays once (spider)
 
 };

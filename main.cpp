@@ -4,6 +4,7 @@
 #include "Bug.h"
 #include "Spider.h"
 #include "HealthBar.h"
+#include "Player.h"
 
 using std::cout;
 
@@ -148,7 +149,9 @@ int main()
 	std::list<const Point*> failPath4 = { &allPoints[15], &allPoints[9] }; // S5 to I
 	std::list<const Point*> failPath5 = { &allPoints[15], &allPoints[10] }; // S5 to K
 
-	std::cout << bug0;
+	//std::cout << bug0;
+
+	Player playerBug(&bugTexture, sf::Vector2u(4, 3), 0.3f, 50.0f);
 
 	sf::Texture spiderTexture;
 	spiderTexture.loadFromFile("png/spider.png");
@@ -162,6 +165,12 @@ int main()
 	health.setPosition(WINDOW_WIDTH / 32.0f, WINDOW_HEIGHT / 18.0f);
 	health.setScale(widthRatio, heightRatio);
 
+	sf::Texture gameOverTexture;
+	gameOverTexture.loadFromFile("png/game_over.png");
+	sf::Sprite gameOver;
+	gameOver.setTexture(gameOverTexture);
+	gameOver.setScale(widthRatio, heightRatio);
+
 	float deltaTime = 0.0f;
 	sf::Clock deltaClock; // time between frames
 	sf::Clock spawnClock; // time between bugs spawning
@@ -169,6 +178,7 @@ int main()
 
 	bool inLunge = false; // spider is currently lunging (triggers lunge animation)
 	bool delayed = false; // spider's switchTime has been extended
+	bool gameIsOver = false; // health is zero
 
 	while (window.isOpen())
 	{
@@ -191,14 +201,14 @@ int main()
 					if ((event.key.code == sf::Keyboard::Left || 
 						event.key.code == sf::Keyboard::A) &&
 						spider.getRow() > 0 &&
-						!inLunge)
+						!inLunge && !gameIsOver)
 					{
 						spider.shift(-1);
 					}
 					if ((event.key.code == sf::Keyboard::Right ||
 						event.key.code == sf::Keyboard::D) &&
 						spider.getRow() < 4 &&
-						!inLunge)
+						!inLunge && !gameIsOver)
 					{
 						spider.shift(1);
 					}
@@ -212,37 +222,47 @@ int main()
 		}
 
 		window.clear();
+		int curHealth = health.getHealth();
 		
-		
-		if (inLunge)
-		{ 
-			inLunge = spider.lunge(deltaTime, &delayed);
-			// check if bug is caught
-		}
-
-		if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
+		if (curHealth >= 0) // update animations only if not game over
 		{
-			healthClock.restart();
-			health.update(-1, deltaTime);
-		}
+			if (inLunge)
+			{
+				inLunge = spider.lunge(deltaTime, &delayed);
+				// if bug is caught - health.update(bug.getHealth(), deltaTime);
+				// else - nothing, health was already decremented
+			}
+			if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
+			{
+				healthClock.restart();
+				health.update(-1, deltaTime);
+			}
+			if (spawnClock.getElapsedTime().asSeconds() >= 3.0f) // spawn new bug every three seconds when they get under a certain population
+			{
+				spawnClock.restart();
+				// spawn new bug
+			}
 
-		if (spawnClock.getElapsedTime().asSeconds() >= 3.0f) // spawn new bug every three seconds when they get under a certain population
-		{
-			spawnClock.restart();
-			// spawn new bug
-		}
+			/*bug0.update(allPoints, deltaTime);
+			bug1.update(allPoints, deltaTime);
+			bug2.update(allPoints, deltaTime);
+			bug3.update(allPoints, deltaTime);
+			bug4.update(allPoints, deltaTime);*/
 
-		bug0.update(allPoints, deltaTime);
-		bug1.update(allPoints, deltaTime);
-		bug2.update(allPoints, deltaTime);
-		bug3.update(allPoints, deltaTime);
-		bug4.update(allPoints, deltaTime);
+			playerBug.update(deltaTime);
+		}
 
 		window.draw(bgSprite);
 		health.draw(window);
 		spider.draw(window);
-		bug0.draw(window);
+		//bug0.draw(window);
+		playerBug.draw(window);
 
+		if (curHealth <= 0) // game over
+		{
+			window.draw(gameOver);
+			gameIsOver = true;
+		}
 
 		window.display();
 	}

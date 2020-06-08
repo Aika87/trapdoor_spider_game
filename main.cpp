@@ -37,19 +37,19 @@ int main()
 	sf::Vector2f unitCircle[16]{ // each direction (up, down, left, right) has 7 options
 		sf::Vector2f(1.0f, 0.0f), // 0 degrees, 0pi
 		sf::Vector2f(sqrtf(3.0f) / 2.0f, 0.5f), // 30 degrees, pi/6
-		sf::Vector2f(sqrtf(2.0f), sqrtf(2.0f)), // 45 degrees, pi/4
+		sf::Vector2f(sqrtf(2.0f) / 2.0f, sqrtf(2.0f) / 2.0f), // 45 degrees, pi/4
 		sf::Vector2f(0.5f, sqrtf(3.0f) / 2.0f), // 60 degrees, pi/3
 		sf::Vector2f(0.0f, 1.0f), // 90 degrees, pi/2
 		sf::Vector2f(-0.5f, sqrtf(3.0f) / 2.0f), // 120 degrees, 2pi/3
-		sf::Vector2f(-sqrtf(2.0f), sqrtf(2.0f)), // 135 degrees, 3pi/4
+		sf::Vector2f(-sqrtf(2.0f) / 2.0f, sqrtf(2.0f) / 2.0f), // 135 degrees, 3pi/4
 		sf::Vector2f(-sqrtf(3.0f) / 2.0f, 0.5f), // 150 degrees, 5pi/6
 		sf::Vector2f(-1.0f, 0.0f), // 180 degrees, pi
 		sf::Vector2f(-sqrtf(3.0f) / 2.0f, -0.5f), // 210 degrees, 7pi/6
-		sf::Vector2f(-sqrtf(2.0f), -sqrtf(2.0f)), // 225 degrees, 5pi/4
+		sf::Vector2f(-sqrtf(2.0f) / 2.0f, -sqrtf(2.0f) / 2.0f), // 225 degrees, 5pi/4
 		sf::Vector2f(-0.5f, -sqrtf(3.0f) / 2.0f), // 240 degrees, 4pi/3
 		sf::Vector2f(0.0f, -1.0f), // 270 degrees, 3pi/2
 		sf::Vector2f(0.5f, -sqrtf(3.0f) / 2.0f), // 300 degrees, 5pi/3
-		sf::Vector2f(sqrtf(2.0f), -sqrtf(2.0f)), // 315 degrees, 7pi/4 
+		sf::Vector2f(sqrtf(2.0f) / 2.0f, -sqrtf(2.0f) / 2.0f), // 315 degrees, 7pi/4 
 		sf::Vector2f(sqrtf(3.0f) / 2.0f, -0.5f), // 330 degrees, 11pi/6
 	};
 

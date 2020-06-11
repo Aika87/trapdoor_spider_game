@@ -7,3 +7,4 @@ TODO:
 * implement level system that makes bugs faster as the levels progress
 * make quit and retry options on the Game Over screen
 * create start screen with title, controls, and credits
+* create sound effects

@@ -61,9 +61,21 @@ void Spider::shift(int direction)
 	body.setTextureRect(animation.uvRect);
 }
 
+void Spider::resetAnimation()
+{
+	row = 2;
+	animation.setCurrentImage(sf::Vector2u(0, row));
+	animation.setSwitchTime(0.05f);
+}
+
 unsigned int Spider::getRow() const
 {
 	return row;
+}
+
+sf::FloatRect Spider::getGlobalBounds() const
+{
+	return body.getGlobalBounds();
 }
 
 void Spider::setRow(unsigned int newRow)

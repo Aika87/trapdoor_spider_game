@@ -24,7 +24,9 @@ public:
 	*/
 	void shift(int direction);
 	unsigned int getRow() const;
+	sf::FloatRect getGlobalBounds() const;
 	void setRow(unsigned int newRow);
+	void resetAnimation();
 
 	void draw(sf::RenderWindow& window);
 	void setScale(float x, float y) { body.setScale(x, y); };

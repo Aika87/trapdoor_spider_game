@@ -2,9 +2,9 @@
 A reflex-oriented game where you play as a trapdoor spider.
 
 TODO:
-* Have the spider catch a bug when it lunges
+* Make bugs start offscreen and enter
+* Make all bugs flee except for the one that's caught
 * implement score system
 * implement level system that makes bugs faster as the levels progress
-* make quit and retry options on the Game Over screen
 * create start screen with title, controls, and credits
 * create sound effects

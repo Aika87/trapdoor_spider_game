@@ -1,5 +1,4 @@
 #include "Bug.h"
-#include "Points.h"
 #include <time.h>
 #include <stdlib.h>
 #include <iostream>
@@ -17,6 +16,8 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 	this->speed = speed;
 	row = 0;
 	faceRight = true;
+	rightSideUp = true;
+	caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
 
 	body.setTexture(*texture);
@@ -30,6 +31,8 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, sf::Ve
 {
 
 	faceRight = true;
+	rightSideUp = true;
+	caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
 
 	unsigned int ranCode = rand() % 8;
@@ -104,61 +107,70 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 
 	// Collision - stay inside an 8 sided polygon with vertices at:
 	// (0, 50), (70, 50), (70, 60), (125, 60), (125, 50), (160, 50), (160, 90), (0, 90)
-
-	if ((posY + body.getGlobalBounds().height) > WINDOW_HEIGHT) // against bottom border, go up
+	if (caught)
 	{
-		// negative y: indexes [9-15]
-		direction = *(directionArray + (rand() % 7 + 9));
+		// flip upsidedown
+		rightSideUp = false;
+		// switch time is shortened
+		animation.setSwitchTime(animation.getSwitchTime() / 1.1f);
 	}
-	else if (posX < 0.0f) // against left border, go right
+	else
 	{
-		// positive x component: indexes [0-3] and [13-15]
-		int coinFlip = rand() % 2;
-		direction = (coinFlip == 1) ? *(directionArray + rand() % 4) : *(directionArray + rand() % 3 + 13);
-	}
-	else if (posY < 45.0f * WINDOW_HEIGHT / 90.0f) // against top border, go down
-	{
-		// positive y component: indexes [1-7]
-		direction = *(directionArray + rand() % 7 + 1);
-	}
-	else if ((posX + body.getGlobalBounds().width) > WINDOW_WIDTH) // against right border, go left
-	{
-		// negative x: indexes [5-11]
-		direction = *(directionArray + rand() % 7 + 5);
-	}
-	else if (posY < 60.0f * WINDOW_HEIGHT / 90.0f &&
-		(posX + body.getGlobalBounds().width) > 70.0f * WINDOW_WIDTH / 160.0f &&
-		posX < 125.0f * WINDOW_WIDTH / 160.0f) // collided with hatch
-	{
-		if (posX > 120.0f * WINDOW_WIDTH / 160.0f) // against right side of hatch, go right
+		if ((posY + body.getGlobalBounds().height) > WINDOW_HEIGHT) // against bottom border, go up
+		{
+			// negative y: indexes [9-15]
+			direction = *(directionArray + (rand() % 7 + 9));
+		}
+		else if (posX < 0.0f) // against left border, go right
 		{
 			// positive x component: indexes [0-3] and [13-15]
 			int coinFlip = rand() % 2;
 			direction = (coinFlip == 1) ? *(directionArray + rand() % 4) : *(directionArray + rand() % 3 + 13);
 		}
-		else if (posY > 55.0f * WINDOW_HEIGHT / 90.0f) // against bottom of hatch, go down
+		else if (posY < 45.0f * WINDOW_HEIGHT / 90.0f) // against top border, go down
 		{
 			// positive y component: indexes [1-7]
 			direction = *(directionArray + rand() % 7 + 1);
 		}
-		else if ((posX + body.getGlobalBounds().width) < 75.0f * WINDOW_WIDTH / 160.0f) // against left side of hatch, go left
+		else if ((posX + body.getGlobalBounds().width) > WINDOW_WIDTH) // against right border, go left
 		{
 			// negative x: indexes [5-11]
 			direction = *(directionArray + rand() % 7 + 5);
 		}
-	}
-	if (direction.x < 0) 
-	{
-		faceRight = false;
-	}
-	else
-	{
-		faceRight = true;
+		else if (posY < 60.0f * WINDOW_HEIGHT / 90.0f &&
+			(posX + body.getGlobalBounds().width) > 70.0f * WINDOW_WIDTH / 160.0f &&
+			posX < 125.0f * WINDOW_WIDTH / 160.0f) // collided with hatch
+		{
+			if (posX > 120.0f * WINDOW_WIDTH / 160.0f) // against right side of hatch, go right
+			{
+				// positive x component: indexes [0-3] and [13-15]
+				int coinFlip = rand() % 2;
+				direction = (coinFlip == 1) ? *(directionArray + rand() % 4) : *(directionArray + rand() % 3 + 13);
+			}
+			else if (posY > 55.0f * WINDOW_HEIGHT / 90.0f) // against bottom of hatch, go down
+			{
+				// positive y component: indexes [1-7]
+				direction = *(directionArray + rand() % 7 + 1);
+			}
+			else if ((posX + body.getGlobalBounds().width) < 75.0f * WINDOW_WIDTH / 160.0f) // against left side of hatch, go left
+			{
+				// negative x: indexes [5-11]
+				direction = *(directionArray + rand() % 7 + 5);
+			}
+		}
+		if (direction.x < 0)
+		{
+			faceRight = false;
+		}
+		else
+		{
+			faceRight = true;
+		}
+
+		body.move(direction * speed * deltaTime);
 	}
 
-	body.move(direction * speed * deltaTime);
-
-	animation.update(row, deltaTime, faceRight);
+	animation.update(row, deltaTime, faceRight, rightSideUp);
 	body.setTextureRect(animation.uvRect);
 }
 
@@ -170,6 +182,16 @@ void Bug::draw(sf::RenderWindow& window)
 sf::FloatRect Bug::getGlobalBounds() const
 {
 	return body.getGlobalBounds();
+}
+
+void Bug::setCaught(bool caught)
+{
+	this->caught = caught;
+}
+
+bool Bug::isCaught() const
+{
+	return caught;
 }
 
 std::ostream& operator<<(std::ostream& out, const Bug& c)

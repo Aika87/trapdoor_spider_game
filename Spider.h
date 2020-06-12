@@ -9,12 +9,17 @@ public:
 		float switchTime);
 	~Spider();
 
-	//	animation update function: 
-	//	start in resting position 
-	//	shift resting position on left/right (change row)
-	//	lunge on spacebar: loop through frames 1-5, lingering on frame 4 and 5, 
-	//		then if bug is caught: show the closed hatch without legs for a few seconds, update health
-	//		if bug isn't caught, go back to resting position
+	/**
+		Animation update function. The spider starts in center resting position,
+		which can shift with the left/right keys.
+		When the space bar is pressed, the spider loops through frames 1-5, 
+		lingering on frame 4 and 5. Then if the bug is caught update health.
+
+		@param deltaTime the time between game loop iterations
+		@param[out] delayed whether the spider's switch time has been extended
+
+		@return bool true if spider is still in lunge animation
+	*/
 	bool lunge(float deltaTime, bool* delayed);
 
 	/**
@@ -24,6 +29,7 @@ public:
 	*/
 	void shift(int direction);
 	unsigned int getRow() const;
+	sf::Vector2u getCurrentImage() const;
 	sf::FloatRect getGlobalBounds() const;
 	void setRow(unsigned int newRow);
 	void resetAnimation();

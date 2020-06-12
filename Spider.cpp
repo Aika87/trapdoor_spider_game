@@ -26,23 +26,47 @@ bool Spider::lunge(float deltaTime, bool* delayed)
 	// we must cycle through only once 
 	// set switch time to three times its value in frames 4 and 5
 	unsigned int prevImage = animation.getCurrentImage().x;
-	animation.update(row, deltaTime, false);
+	animation.update(row, deltaTime, false, true);
 	unsigned int curImage = animation.getCurrentImage().x;
 	body.setTextureRect(animation.uvRect);
 
-	if (curImage == 0 && prevImage != 0) // we've cycled through once
+	switch (curImage)
 	{
-		animation.setSwitchTime(0.05f); // had to hardcode switchTime, bad form
-		*delayed = false;
-		std::cout << "Spider switchTime has been reset." << std::endl;
-		return false;
+	case 0:
+		if (prevImage != 0) // we've cycled through once
+		{
+			animation.setSwitchTime(0.05f); // had to hardcode switchTime, bad form
+			*delayed = false;
+			std::cout << "Spider switchTime has been reset." << std::endl;
+			return false;
+		}
+		break;
+	case 4:
+		if (!(*delayed)) // lengthen time between frames by a certain factor
+		{
+			animation.setSwitchTime(1.5f); // hardcoding, bad form
+			*delayed = true;
+			std::cout << "Spider switchTime has been extended." << std::endl;
+		}
+		break;
+	default:
+		break;
 	}
-	else if (curImage == 4 && !(*delayed)) // lengthen time between frames by a certain factor
-	{
-		animation.setSwitchTime(1.5f); // hardcoding, bad form
-		*delayed = true;
-		std::cout << "Spider switchTime has been extended." << std::endl;
-	}
+
+	//if (curImage == 0 && prevImage != 0) // we've cycled through once
+	//{
+	//	animation.setSwitchTime(0.05f); // had to hardcode switchTime, bad form
+	//	*delayed = false;
+	//	std::cout << "Spider switchTime has been reset." << std::endl;
+	//	return false;
+	//}
+	//else if (curImage == 4 && !(*delayed)) // lengthen time between frames by a certain factor
+	//{
+	//	animation.setSwitchTime(1.5f); // hardcoding, bad form
+	//	*delayed = true;
+	//	std::cout << "Spider switchTime has been extended." << std::endl;
+	//}
+	
 	return true;
 }
 
@@ -71,6 +95,11 @@ void Spider::resetAnimation()
 unsigned int Spider::getRow() const
 {
 	return row;
+}
+
+sf::Vector2u Spider::getCurrentImage() const
+{
+	return animation.getCurrentImage();
 }
 
 sf::FloatRect Spider::getGlobalBounds() const

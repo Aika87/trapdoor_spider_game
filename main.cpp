@@ -48,12 +48,12 @@ int main()
 		sf::Vector2f(sqrtf(3.0f) / 2.0f, -0.5f), // 330 degrees, 11pi/6
 	};
 
-	int bugCount = 5;
-
+	size_t bugCount = 5;
+	size_t bugCountMin = 5;
 	sf::Texture bugTexture;
 	bugTexture.loadFromFile("png/bugs.png");
 	std::vector<Bug> bugVector;
-	for (int i = 0; i < bugCount; ++i)
+	for (size_t i = 0; i < bugCount; ++i)
 	{
 		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
 		std::cout << bugVector.at(i);
@@ -68,6 +68,7 @@ int main()
 
 	// strand rectangles - used to determine where a bug is when its caught
 	// goes from left to right
+	int webStrandCount = 5;
 	sf::FloatRect webStrands[5]{
 		// left
 		sf::FloatRect(40.0f * WINDOW_WIDTH / 160.0f,
@@ -128,9 +129,10 @@ int main()
 	sf::Clock spawnClock; // time between bugs spawning
 	sf::Clock healthClock; // time between health decrements
 
-	bool inLunge = false; // spider is currently lunging (triggers lunge animation)
+	bool inLunge = false; // spider is currently lunging
 	bool delayed = false; // spider's switchTime has been extended
 	bool gameIsOver = false; // health is zero
+	bool caughtBug = false; // spider has caught a bug
 
 	while (window.isOpen())
 	{
@@ -150,25 +152,25 @@ int main()
 					{
 						window.close(); 
 					}
-					if ((event.key.code == sf::Keyboard::Left || 
+					else if (!inLunge && !gameIsOver &&
+						(event.key.code == sf::Keyboard::Left ||
 						event.key.code == sf::Keyboard::A) &&
-						spider.getRow() > 0 &&
-						!inLunge && !gameIsOver)
+						spider.getRow() > 0)
 					{
 						spider.shift(-1);
 					}
-					if ((event.key.code == sf::Keyboard::Right ||
+					else if (!inLunge && !gameIsOver && 
+						(event.key.code == sf::Keyboard::Right ||
 						event.key.code == sf::Keyboard::D) &&
-						spider.getRow() < 4 &&
-						!inLunge && !gameIsOver)
+						spider.getRow() < 4)
 					{
 						spider.shift(1);
 					}
-					if (event.key.code == sf::Keyboard::Space && !gameIsOver)
+					else if (!gameIsOver && event.key.code == sf::Keyboard::Space)
 					{
 						inLunge = true;
 						health.update(-1, deltaTime); // Fix needed: holding down space makes health continually drain
-						// the bugs should start fleeing when the animation starts
+						// all bugs start fleeing when the animation starts
 					}
 					break;
 				case sf::Event::MouseButtonPressed:
@@ -176,16 +178,18 @@ int main()
 					{
 						sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 						cout << "Mouseclick position: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
-						if (quit.getGlobalBounds().contains(sf::Vector2f(mousePos)) && gameIsOver)
+						if (gameIsOver && quit.getGlobalBounds().contains(sf::Vector2f(mousePos)))
 						{
 							window.close();
 						}
-						else if (retry.getGlobalBounds().contains(sf::Vector2f(mousePos)) && gameIsOver)
+						else if (gameIsOver && retry.getGlobalBounds().contains(sf::Vector2f(mousePos)))
 						{
-							health.reset();
+							spawnClock.restart();
+							healthClock.restart();
+							health.reset(deltaTime);
 							spider.resetAnimation(); // Fix needed: the spider does another quick lunge after game is reset
 							bugVector.clear();
-							for (int i = 0; i < bugCount; ++i)
+							for (size_t i = 0; i < bugCount; ++i)
 							{
 								bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
 								std::cout << bugVector.at(i);
@@ -207,35 +211,54 @@ int main()
 		}
 		else // update animations only if not game over
 		{
+			int bugHealth = 0; // health of prospective caught bug
 			if (inLunge)
 			{
-				inLunge = spider.lunge(deltaTime, &delayed);
 				// check if any of the bugs intersect the spider sprite (all directions)
-				for (int i = 0; i < bugCount; ++i)
+				for (size_t i = 0; i < bugCount; ++i) // check every bug
 				{
-					if (spider.getGlobalBounds().intersects(bugVector.at(i).getGlobalBounds()))
+					sf::FloatRect bugRect = bugVector.at(i).getGlobalBounds();
+					if (delayed && webStrands[spider.getRow()].intersects(bugRect)) // bug and spider are on the same strand, spider has reached 4th frame
 					{
-						// check which strand rectangle the bug is in, if direction spider is facing matches, if its in 4th frame
-						// if so, that particular bug is caught
+						caughtBug = true;
+						bugVector.at(i).setCaught(caughtBug);
+						// bug goes into caught animation
+						bugHealth = bugVector.at(i).getHealth(); // store health because it should only be incremented after spider is back in burrow
+						// call destructor on bug when spider is in fifth frame
 					}
 				}
-				// if bug is caught - bug goes into caught animation, health.update(bug.getHealth(), deltaTime);
-				// increment score
-				// else - nothing, health was already decremented
+				if (caughtBug && spider.getCurrentImage().x == 5) // 
+				{
+					health.update(bugHealth, deltaTime);
+					caughtBug = false;
+					// increment score
+				}
+				inLunge = spider.lunge(deltaTime, &delayed);
 			}
 			if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
 			{
 				healthClock.restart();
 				health.update(-1, deltaTime);
 			}
-			if (spawnClock.getElapsedTime().asSeconds() >= 3.0f) // spawn new bug every three seconds when they get under a certain population
+			if (spawnClock.getElapsedTime().asSeconds() >= 3.0f && bugVector.size() < bugCountMin) // spawn new bug every three seconds when they get under a certain population
 			{
 				spawnClock.restart();
-				// spawn new bug
+				while (bugVector.size() < bugCountMin)
+				{
+					bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
+					++bugCount;
+				}
 			}
-			for (int i = 0; i < bugCount; ++i)
+			for (size_t i = 0; i < bugCount; ++i)
 			{
-				bugVector.at(i).update(deltaTime, unitCircle);
+				auto bugIter = bugVector.begin() + i;
+				
+				if (bugIter->isCaught() && spider.getCurrentImage().x == 5)
+				{
+					bugVector.erase(bugIter);
+					--bugCount;
+				}
+				bugIter->update(deltaTime, unitCircle);
 			}
 		}
 
@@ -257,123 +280,3 @@ int main()
 
 	return 0;
 }
-
-
-
-//OBSOLETE
-//Point allPoints[18]
-//{
-//	{10.0f * widthRatio, 50.0f * heightRatio, 'A'}, //A
-//	{47.0f * widthRatio, 43.0f * heightRatio, 'B'}, //B
-//	{130.0f * widthRatio, 42.0f * heightRatio, 'C'}, //C
-//	{146.0f * widthRatio, 31.0f * heightRatio, 'D'}, //D
-//	{39.0f * widthRatio, 65.0f * heightRatio, 'E'}, //E
-//	{72.0f * widthRatio, 75.0f * heightRatio, 'F'}, //F
-//	{85.0f * widthRatio, 62.0f * heightRatio, 'G'}, //G
-//	{115.0f * widthRatio, 65.0f * heightRatio, 'H'}, //H
-//	{137.0f * widthRatio, 60.0f * heightRatio, 'I'}, //I
-//	{30.0f * widthRatio, 78.0f * heightRatio, 'J'}, //J
-//	{145.0f * widthRatio, 76.0f * heightRatio, 'K'}, //K
-//	{-20.0f * widthRatio, 45.0f * heightRatio, '1'}, //S1
-//	{26.0f * widthRatio, 110.0f * heightRatio, '2'}, //S2
-//	{51.0f * widthRatio, 110.0f * heightRatio, '3'}, //S3
-//	{95.0f * widthRatio, 110.0f * heightRatio, '4'}, //S4
-//	{135.0f * widthRatio, 110.0f * heightRatio, '5'}, //S5
-//	{180.0f * widthRatio, 70.0f * heightRatio, '6'}, //S6
-//	{180.0f * widthRatio, 42.0f * heightRatio, '7'} //S7
-//};
-//
-////path connections
-//allPoints[0].connect(allPoints[1]);
-//allPoints[0].connect(allPoints[4]);
-//allPoints[0].connect(allPoints[9]);
-//allPoints[0].connect(allPoints[11]);
-//
-//allPoints[1].connect(allPoints[0]);
-//allPoints[1].connect(allPoints[4]);
-//allPoints[1].connect(allPoints[5]);
-//allPoints[1].connect(allPoints[6]);
-//allPoints[1].connect(allPoints[11]);
-//
-//allPoints[2].connect(allPoints[3]);
-//allPoints[2].connect(allPoints[7]);
-//allPoints[2].connect(allPoints[8]);
-//allPoints[2].connect(allPoints[16]);
-//
-//allPoints[3].connect(allPoints[2]);
-//allPoints[3].connect(allPoints[8]);
-//allPoints[3].connect(allPoints[10]);
-//allPoints[3].connect(allPoints[17]);
-//
-//allPoints[4].connect(allPoints[0]);
-//allPoints[4].connect(allPoints[1]);
-//allPoints[4].connect(allPoints[5]);
-//allPoints[4].connect(allPoints[9]);
-//allPoints[4].connect(allPoints[12]);
-//
-//allPoints[5].connect(allPoints[1]);
-//allPoints[5].connect(allPoints[4]);
-//allPoints[5].connect(allPoints[6]);
-//allPoints[5].connect(allPoints[9]);
-//allPoints[5].connect(allPoints[13]);
-//
-//allPoints[6].connect(allPoints[1]);
-//allPoints[6].connect(allPoints[5]);
-//allPoints[6].connect(allPoints[7]);
-//allPoints[6].connect(allPoints[14]);
-//
-//allPoints[7].connect(allPoints[6]);
-//allPoints[7].connect(allPoints[2]);
-//allPoints[7].connect(allPoints[8]);
-//allPoints[7].connect(allPoints[14]);
-//
-//allPoints[8].connect(allPoints[2]);
-//allPoints[8].connect(allPoints[7]);
-//allPoints[8].connect(allPoints[3]);
-//allPoints[8].connect(allPoints[10]);
-//allPoints[8].connect(allPoints[15]);
-//
-//allPoints[9].connect(allPoints[0]);
-//allPoints[9].connect(allPoints[4]);
-//allPoints[9].connect(allPoints[5]);
-//allPoints[9].connect(allPoints[13]);
-//
-//allPoints[10].connect(allPoints[3]);
-//allPoints[10].connect(allPoints[8]);
-//allPoints[10].connect(allPoints[15]);
-//
-//allPoints[11].connect(allPoints[0]);
-//allPoints[11].connect(allPoints[1]);
-//
-//allPoints[12].connect(allPoints[4]);
-//
-//allPoints[13].connect(allPoints[9]);
-//allPoints[13].connect(allPoints[5]);
-//
-//allPoints[14].connect(allPoints[6]);
-//allPoints[14].connect(allPoints[7]);
-//
-//allPoints[15].connect(allPoints[8]);
-//allPoints[15].connect(allPoints[10]);
-//
-//allPoints[16].connect(allPoints[2]);
-//
-//allPoints[17].connect(allPoints[3]);
-//
-//// edges within range: B to E, B to F, B to G, G to F, G to S4, G to H,
-//// H to C, H to S4, H to I, H to S5, D to I
-
-
-//Bug bug0(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
-//Bug bug1(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
-//Bug bug2(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
-//Bug bug3(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
-//Bug bug4(&bugTexture, sf::Vector2u(4, 3), 0.3f, allPoints);
-//
-//// Failed paths
-//std::list<const Point*> failPath0 = { &allPoints[11], &allPoints[1] }; // S1 to B
-//std::list<const Point*> failPath1 = { &allPoints[12], &allPoints[4] }; // S2 to E
-//std::list<const Point*> failPath2 = { &allPoints[13], &allPoints[5] }; // S3 to F
-//std::list<const Point*> failPath3 = { &allPoints[14], &allPoints[7] }; // S4 to H
-//std::list<const Point*> failPath4 = { &allPoints[15], &allPoints[9] }; // S5 to I
-//std::list<const Point*> failPath5 = { &allPoints[15], &allPoints[10] }; // S5 to K

@@ -8,6 +8,7 @@
 #include "Bug.h"
 
 using std::cout;
+using std::endl;
 
 static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().width / 3;
 static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
@@ -170,6 +171,7 @@ int main()
 					{
 						inLunge = true;
 						health.update(-1, deltaTime); // Fix needed: holding down space makes health continually drain
+						cout << "Used energy for lunge. Health = " << health.getHealth() << endl;
 						// all bugs start fleeing when the animation starts
 					}
 					break;
@@ -230,6 +232,8 @@ int main()
 				if (caughtBug && spider.getCurrentImage().x == 5) // 
 				{
 					health.update(bugHealth, deltaTime);
+					healthClock.restart();
+					cout << "Bug caught, health clock reset. Health = " << health.getHealth() << endl;
 					caughtBug = false;
 					// increment score
 				}
@@ -239,6 +243,7 @@ int main()
 			{
 				healthClock.restart();
 				health.update(-1, deltaTime);
+				cout << "Getting hungry, health clock reset. Health = " << health.getHealth() << endl;
 			}
 			if (spawnClock.getElapsedTime().asSeconds() >= 3.0f && bugVector.size() < bugCountMin) // spawn new bug every three seconds when they get under a certain population
 			{

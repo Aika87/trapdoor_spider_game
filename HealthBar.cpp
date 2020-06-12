@@ -31,7 +31,7 @@ void HealthBar::update(int health, float deltaTime)
 	}
 	else if (this->health >= 15) // health restored fully
 	{
-		health = 15;
+		this->health = 15;
 		animation.setCurrentImage(sf::Vector2u(0, 0));
 	}
 	else // health is between 0 and 15
@@ -41,12 +41,14 @@ void HealthBar::update(int health, float deltaTime)
 		animation.setCurrentImage(sf::Vector2u(x, 0));
 	}
 
-	animation.update(0, deltaTime, false);
+	animation.update(0, deltaTime, false, true);
 	body.setTextureRect(animation.uvRect);
 }
 
-void HealthBar::reset()
+void HealthBar::reset(float deltaTime)
 {
 	health = 15;
 	animation.setCurrentImage(sf::Vector2u(0, 0));
+	animation.update(0, deltaTime, false, true);
+	body.setTextureRect(animation.uvRect);
 }

@@ -1,5 +1,16 @@
 #include "Animation.h"
 
+Animation::Animation(sf::Texture* texture, sf::Vector2u imageCount)
+{
+	this->imageCount = imageCount;
+	currentImage.x = 0;
+	totalTime = 0.0f;
+	switchTime = 0.0f;
+
+	uvRect.width = texture->getSize().x / imageCount.x;
+	uvRect.height = texture->getSize().y / imageCount.y;
+}
+
 Animation::Animation(sf::Texture* texture, sf::Vector2u imageCount, float switchTime)
 {
 	this->imageCount = imageCount;
@@ -11,7 +22,7 @@ Animation::Animation(sf::Texture* texture, sf::Vector2u imageCount, float switch
 	uvRect.height = texture->getSize().y / imageCount.y;
 }
 
-void Animation::update(int row, float deltaTime, bool faceRight)
+void Animation::update(int row, float deltaTime, bool faceRight, bool rightSideUp)
 {
 	currentImage.y = row;
 	totalTime += deltaTime;
@@ -39,6 +50,32 @@ void Animation::update(int row, float deltaTime, bool faceRight)
 		uvRect.left = currentImage.x * uvRect.width;
 		uvRect.width = abs(uvRect.width);
 	}
+	if (rightSideUp)
+	{
+		uvRect.top = currentImage.y * uvRect.height;
+		uvRect.height = abs(uvRect.height);
+	}
+	else
+	{
+		uvRect.top = (currentImage.y + 1) * abs(uvRect.height);
+		uvRect.height = -abs(uvRect.height);
+	}
+}
+
+void Animation::updateManually(int row, int increase)
+{
+	currentImage.y = row;
+
+	currentImage.x = increase;
+
+	if (currentImage.x >= imageCount.x)
+	{
+		currentImage.x = 0;
+	}
+
+	uvRect.left = currentImage.x * uvRect.width;
+	uvRect.top = currentImage.y * uvRect.height;
+
 }
 
 sf::Vector2u Animation::getCurrentImage() const

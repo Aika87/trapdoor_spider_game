@@ -6,6 +6,8 @@
 #include "Spider.h"
 #include "HealthBar.h"
 #include "Bug.h"
+#include "Score.h"
+#include "AnimatedButton.h"
 
 using std::cout;
 using std::endl;
@@ -18,17 +20,9 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Trapdoor", sf::Style::Default);
 	window.setVerticalSyncEnabled(true);
 
-	sf::Texture bg;
-	bg.loadFromFile("png/background.png");
-	sf::Sprite bgSprite;
-	bgSprite.setTexture(bg);
-	unsigned int bgx = bg.getSize().x;
-	unsigned int bgy = bg.getSize().y;
-	float widthRatio = 1.0f * WINDOW_WIDTH / bgx;
-	float heightRatio = 1.0f * WINDOW_HEIGHT / bgy;
-	bgSprite.setScale(widthRatio, heightRatio);
 
-	srand(unsigned int(time(NULL))); // initialize random int generator
+	srand(unsigned int(time(NULL)));
+	enum state {TITLE, IN_GAME, GAME_OVER};
 
 	sf::Vector2f unitCircle[16]{ // each direction (up, down, left, right) has 7 options
 		sf::Vector2f(1.0f, 0.0f), // 0 degrees, 0pi
@@ -48,24 +42,6 @@ int main()
 		sf::Vector2f(sqrtf(2.0f) / 2.0f, -sqrtf(2.0f) / 2.0f), // 315 degrees, 7pi/4 
 		sf::Vector2f(sqrtf(3.0f) / 2.0f, -0.5f), // 330 degrees, 11pi/6
 	};
-
-	size_t bugCount = 5;
-	size_t bugCountMin = 5;
-	sf::Texture bugTexture;
-	bugTexture.loadFromFile("png/bugs.png");
-	std::vector<Bug> bugVector;
-	for (size_t i = 0; i < bugCount; ++i)
-	{
-		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
-		std::cout << bugVector.at(i);
-	}
-
-	sf::Texture spiderTexture;
-	spiderTexture.loadFromFile("png/spider.png"); // orange is E25630, blue is 9fcbf8
-	Spider spider(&spiderTexture, sf::Vector2u(6, 5), 0.05f);
-	spider.setPosition(WINDOW_WIDTH * 34.0f / 160.0f, 
-		WINDOW_HEIGHT * 12.0f / 45.0f);
-	spider.setScale(widthRatio, heightRatio);
 
 	// strand rectangles - used to determine where a bug is when its caught
 	// goes from left to right
@@ -98,6 +74,51 @@ int main()
 			3.0f * WINDOW_HEIGHT / 90.0f),
 	};
 
+sf::Texture bg;
+	bg.loadFromFile("png/background.png");
+	sf::Sprite bgSprite;
+	bgSprite.setTexture(bg);
+	unsigned int bgx = bg.getSize().x;
+	unsigned int bgy = bg.getSize().y;
+	float widthRatio = 1.0f * WINDOW_WIDTH / bgx;
+	float heightRatio = 1.0f * WINDOW_HEIGHT / bgy;
+	bgSprite.setScale(widthRatio, heightRatio);
+
+	sf::Texture titleTexture;
+	titleTexture.loadFromFile("png/title_screen.png");
+	sf::Sprite title;
+	title.setTexture(titleTexture);
+	title.setScale(widthRatio, heightRatio);
+
+	sf::Texture startTexture;
+	startTexture.loadFromFile("png/start_button.png");
+	AnimatedButton start(&startTexture, sf::Vector2u(2, 1), 1.0f);
+	start.setPosition(61.0f * WINDOW_WIDTH / 160.0f, 45.0f * WINDOW_HEIGHT / 90.0f);
+	start.setScale(widthRatio, heightRatio);
+
+	sf::Texture bugTexture;
+	bugTexture.loadFromFile("png/bugs.png");
+	AnimatedButton titleBugs(&bugTexture, sf::Vector2u(4, 1), 0.5f);
+	titleBugs.setPosition(115.0f * WINDOW_WIDTH / 160.0f, 42.0f * WINDOW_HEIGHT / 90.0f);
+	titleBugs.setScale(widthRatio, heightRatio);
+
+	size_t bugCount = 5;
+	size_t bugCountMin = 5;
+	std::vector<Bug> bugVector;
+	for (size_t i = 0; i < bugCount; ++i)
+	{
+		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
+		std::cout << bugVector.at(i);
+	}
+
+	sf::Texture spiderTexture;
+	spiderTexture.loadFromFile("png/spider.png"); // orange is E25630, blue is 9fcbf8
+	Spider spider(&spiderTexture, sf::Vector2u(6, 5), 0.05f);
+	spider.setPosition(WINDOW_WIDTH * 34.0f / 160.0f, 
+		WINDOW_HEIGHT * 12.0f / 45.0f);
+	spider.setScale(widthRatio, heightRatio);
+
+	
 
 	sf::Texture healthTexture;
 	healthTexture.loadFromFile("png/health.png");
@@ -123,17 +144,37 @@ int main()
 	sf::Sprite retry;
 	retry.setTexture(retryTexture);
 	retry.setScale(widthRatio, heightRatio);
-	retry.setPosition(129.0f * WINDOW_WIDTH / 160.0f, 80.0f * WINDOW_HEIGHT / 90.0f);
+	retry.setPosition(121.0f * WINDOW_WIDTH / 160.0f, 80.0f * WINDOW_HEIGHT / 90.0f);
+
+	sf::Texture scoreBgTexture;
+	scoreBgTexture.loadFromFile("png/scoreBg.png");
+	sf::Sprite scoreBg;
+	scoreBg.setTexture(scoreBgTexture);
+	scoreBg.setScale(5.0f, 5.0f);
+	scoreBg.setPosition(WINDOW_WIDTH - scoreBg.getGlobalBounds().width - 20, WINDOW_HEIGHT / 18.0f);
+
+	sf::Texture levelTexture;
+	levelTexture.loadFromFile("png/level.png");
+	sf::Sprite level;
+	level.setTexture(levelTexture);
+	level.setScale(5.0f, 5.0f);
+	level.setPosition(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 18.0f);
+
+	sf::Texture scoreTexture;
+	scoreTexture.loadFromFile("png/score.png");
+	sf::Texture digitTexture;
+	digitTexture.loadFromFile("png/digits.png");
+	Score score(&scoreTexture, sf::Vector2u(10, 1), &digitTexture, sf::Vector2u(10, 1),
+		scoreBg.getGlobalBounds().width, scoreBg.getPosition(), level.getGlobalBounds().width, level.getPosition(), 2000);
 
 	float deltaTime = 0.0f;
 	sf::Clock deltaClock; // time between frames
-	sf::Clock spawnClock; // time between bugs spawning
 	sf::Clock healthClock; // time between health decrements
 
 	bool inLunge = false; // spider is currently lunging
 	bool delayed = false; // spider's switchTime has been extended
-	bool gameIsOver = false; // health is zero
 	bool caughtBug = false; // spider has caught a bug
+	state gameState = TITLE;
 
 	while (window.isOpen())
 	{
@@ -153,42 +194,45 @@ int main()
 					{
 						window.close(); 
 					}
-					else if (!inLunge && !gameIsOver &&
-						(event.key.code == sf::Keyboard::Left ||
-						event.key.code == sf::Keyboard::A) &&
-						spider.getRow() > 0)
+					switch (gameState)
 					{
-						spider.shift(-1);
-					}
-					else if (!inLunge && !gameIsOver && 
-						(event.key.code == sf::Keyboard::Right ||
-						event.key.code == sf::Keyboard::D) &&
-						spider.getRow() < 4)
-					{
-						spider.shift(1);
-					}
-					else if (!gameIsOver && event.key.code == sf::Keyboard::Space)
-					{
-						inLunge = true;
-						health.update(-1, deltaTime); // Fix needed: holding down space makes health continually drain
-						cout << "Used energy for lunge. Health = " << health.getHealth() << endl;
-						// all bugs start fleeing when the animation starts
-					}
-					break;
-				case sf::Event::MouseButtonPressed:
-					if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-					{
-						sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-						cout << "Mouseclick position: (" << mousePos.x << ", " << mousePos.y << ")" << std::endl;
-						if (gameIsOver && quit.getGlobalBounds().contains(sf::Vector2f(mousePos)))
+					case TITLE:
+						if (event.key.code == sf::Keyboard::Return)
+						{
+							gameState = IN_GAME;
+						}
+						break;
+					case IN_GAME:
+						if (!inLunge &&
+							(event.key.code == sf::Keyboard::Left ||
+							event.key.code == sf::Keyboard::A) &&
+							spider.getRow() > 0)
+							{
+							spider.shift(-1);
+							}
+						else if (!inLunge && 
+							(event.key.code == sf::Keyboard::Right ||
+							event.key.code == sf::Keyboard::D) &&
+							spider.getRow() < 4)
+						{
+							spider.shift(1);
+						}
+						else if (event.key.code == sf::Keyboard::Space)
+						{
+							inLunge = true;
+						}
+						break;
+					case GAME_OVER:
+						if (event.key.code == sf::Keyboard::Q)
 						{
 							window.close();
 						}
-						else if (gameIsOver && retry.getGlobalBounds().contains(sf::Vector2f(mousePos)))
+						else if (event.key.code == sf::Keyboard::R)
 						{
-							spawnClock.restart();
+							gameState = IN_GAME;
 							healthClock.restart();
 							health.reset(deltaTime);
+							score.updateScore(0);
 							spider.resetAnimation(); // Fix needed: the spider does another quick lunge after game is reset
 							bugVector.clear();
 							for (size_t i = 0; i < bugCount; ++i)
@@ -196,8 +240,18 @@ int main()
 								bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
 								std::cout << bugVector.at(i);
 							}
-							gameIsOver = false;
 						}
+						break;
+					default:
+						cout << "Game state error." << endl;
+						break;
+					}
+					break;
+				case sf::Event::KeyReleased:
+					if (gameState == IN_GAME && event.key.code == sf::Keyboard::Space)
+					{
+						health.update(-1, deltaTime);
+						cout << "Used energy for lunge. Health = " << health.getHealth() << endl;
 					}
 					break;
 
@@ -206,80 +260,114 @@ int main()
 
 		window.clear();
 		int curHealth = health.getHealth();
-		
-		if (curHealth <= 0)
+
+		switch (gameState) 
 		{
-			gameIsOver = true;
-		}
-		else // update animations only if not game over
-		{
-			int bugHealth = 0; // health of prospective caught bug
-			if (inLunge)
+		case TITLE:
+			start.update(deltaTime);
+			titleBugs.update(deltaTime);
+			window.draw(title);
+			start.draw(window);
+			titleBugs.draw(window);
+			break;
+		case IN_GAME:
+			if (curHealth <= 0)
 			{
-				// check if any of the bugs intersect the spider sprite (all directions)
-				for (size_t i = 0; i < bugCount; ++i) // check every bug
+				gameState = GAME_OVER;
+			}
+			else 
+			{
+				if (inLunge)
 				{
-					sf::FloatRect bugRect = bugVector.at(i).getGlobalBounds();
-					if (delayed && webStrands[spider.getRow()].intersects(bugRect)) // bug and spider are on the same strand, spider has reached 4th frame
+					unsigned int spiderRow = spider.getRow();
+					// check if any of the bugs intersect the spider sprite (all directions)
+					for (size_t i = 0; i < bugCount; ++i) // check every bug
 					{
-						caughtBug = true;
-						bugVector.at(i).setCaught(caughtBug);
-						// bug goes into caught animation
-						bugHealth = bugVector.at(i).getHealth(); // store health because it should only be incremented after spider is back in burrow
-						// call destructor on bug when spider is in fifth frame
+						sf::FloatRect bugRect = bugVector.at(i).getGlobalBounds();
+						if (delayed && webStrands[spiderRow].intersects(bugRect)) // bug and spider are on the same strand, spider has reached 4th frame
+						{
+							caughtBug = true;
+							bugVector.at(i).setCaught(caughtBug);
+						}
+						else if (!webStrands[spiderRow].intersects(bugRect))
+						{
+							bugVector.at(i).flee();
+						}
+					}
+					if (caughtBug && spider.getCurrentImage().x == 5)
+					{
+						healthClock.restart();
+						caughtBug = false;
+					}
+					inLunge = spider.lunge(deltaTime, &delayed);
+				}
+				if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
+				{
+					healthClock.restart();
+					health.update(-1, deltaTime);
+					cout << "Getting hungry. Health = " << health.getHealth() << endl;
+				}
+				if (!inLunge && bugCount < bugCountMin) // spawn new bug every three seconds when they get under a certain population
+				{
+					while (bugVector.size() < bugCountMin)
+					{
+						bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
+						++bugCount;
 					}
 				}
-				if (caughtBug && spider.getCurrentImage().x == 5) // 
+				for (size_t i = 0; i < bugCount; ++i)
 				{
-					health.update(bugHealth, deltaTime);
-					healthClock.restart();
-					cout << "Bug caught, health clock reset. Health = " << health.getHealth() << endl;
-					caughtBug = false;
-					// increment score
-				}
-				inLunge = spider.lunge(deltaTime, &delayed);
-			}
-			if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
-			{
-				healthClock.restart();
-				health.update(-1, deltaTime);
-				cout << "Getting hungry, health clock reset. Health = " << health.getHealth() << endl;
-			}
-			if (spawnClock.getElapsedTime().asSeconds() >= 3.0f && bugVector.size() < bugCountMin) // spawn new bug every three seconds when they get under a certain population
-			{
-				spawnClock.restart();
-				while (bugVector.size() < bugCountMin)
-				{
-					bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
-					++bugCount;
+					auto bugIter = bugVector.begin() + i;
+					sf::FloatRect bugRect = bugIter->getGlobalBounds();
+					if (bugIter->isCaught() && spider.getCurrentImage().x == 5)
+					{
+						int bugHealth = bugIter->getHealth();
+						health.update(bugHealth, deltaTime);
+						score.updateScore(bugHealth);
+						cout << "Bug caught, worth " << bugHealth << " health. New health = " << health.getHealth() << endl;
+						cout << "Score = " << score.getScore() << endl;
+						bugVector.erase(bugIter);
+						--bugCount;
+					}
+					else if (bugIter->isFleeing() && (bugRect.top > WINDOW_HEIGHT ||
+						bugRect.left > WINDOW_WIDTH || bugRect.left + bugRect.width < 0.0f))
+					{
+						bugVector.erase(bugIter);
+						--bugCount;
+					}
+					bugIter->update(deltaTime, unitCircle);
 				}
 			}
-			for (size_t i = 0; i < bugCount; ++i)
+			window.draw(bgSprite);
+			spider.draw(window);
+			for (Bug b : bugVector)
 			{
-				auto bugIter = bugVector.begin() + i;
-				
-				if (bugIter->isCaught() && spider.getCurrentImage().x == 5)
-				{
-					bugVector.erase(bugIter);
-					--bugCount;
-				}
-				bugIter->update(deltaTime, unitCircle);
+				b.draw(window);
 			}
-		}
-
-		window.draw(bgSprite);
-		spider.draw(window);
-		for (int i = 0; i < bugCount; ++i)
-		{
-			bugVector.at(i).draw(window);
-		}
-		if (gameIsOver) // game over
-		{
+			window.draw(level);
+			window.draw(scoreBg);
+			score.draw(window);
+			health.draw(window);
+			break;
+		case GAME_OVER:
+			window.draw(bgSprite);
+			spider.draw(window);
+			for (Bug b : bugVector)
+			{
+				b.draw(window);
+			}
 			window.draw(gameOver);
 			window.draw(retry);
 			window.draw(quit);
+			window.draw(level);
+			window.draw(scoreBg);
+			score.draw(window);
+			health.draw(window);
+			break;
+		default:
+			cout << "Game state error." << endl;
+			break;
 		}
-		health.draw(window);
 		window.display();
 	}
 

@@ -2,22 +2,20 @@
 #include <time.h>
 #include <stdlib.h>
 #include <iostream>
-#include <map>
-#include <vector>
 
 using namespace std;
 
 static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().width / 3;
 static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
+static const sf::Vector2f BURROW(98.0f * WINDOW_WIDTH / 160.0f, 53.0f * WINDOW_HEIGHT / 90.0f);
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, sf::Vector2f* directionArray) :
+Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray) :
 	animation(texture, imageCount, switchTime)
 {
 	this->speed = speed;
 	row = 0;
-	faceRight = true;
-	rightSideUp = true;
-	caught = false;
+	rightSideUp = faceRight = true;
+	fleeing = caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
 
 	body.setTexture(*texture);
@@ -26,7 +24,7 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 
 }
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, sf::Vector2f* directionArray) :
+Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray) :
 	animation(texture, imageCount, switchTime)
 {
 
@@ -95,11 +93,6 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, sf::Ve
 
 }
 
-
-Bug::~Bug()
-{
-}
-
 void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 {
 	float posX = body.getPosition().x,
@@ -107,14 +100,36 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 
 	// Collision - stay inside an 8 sided polygon with vertices at:
 	// (0, 50), (70, 50), (70, 60), (125, 60), (125, 50), (160, 50), (160, 90), (0, 90)
-	if (caught)
+	if (caught && rightSideUp)
 	{
 		// flip upsidedown
 		rightSideUp = false;
 		// switch time is shortened
-		animation.setSwitchTime(animation.getSwitchTime() / 1.1f);
+		animation.setSwitchTime(animation.getSwitchTime() / 5.0f);
 	}
-	else
+	else if (fleeing && !caught) // fleeing and not already in a fleeing direction
+	{
+		if (posX >= BURROW.x && (direction.x < 0.0f || direction.y < 0.0f)) // bug is to the right or directly underneath hatch, going left or up
+		{
+			// x must be negative, y must be less than or equal to zero
+			int randInt = rand() % 5 + 12; // indexes [12-15] and [0]
+			if (randInt == 16)
+			{
+				direction = *directionArray;
+			}
+			else
+			{
+				direction = *(directionArray + randInt);
+			}
+		}
+		else if (posX < BURROW.x && (direction.x > 0.0f || direction.y < 0.0f)) // bug is to the left of hatch, going right or up
+		{
+			// x must be positive, y must be less than or equal to zero
+			direction = *(directionArray + (rand() % 5 + 8)); // indexes [8-12]
+		}
+		body.move(direction * speed * deltaTime);
+	}
+	else if (!fleeing && !caught)
 	{
 		if ((posY + body.getGlobalBounds().height) > WINDOW_HEIGHT) // against bottom border, go up
 		{
@@ -158,18 +173,16 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 				direction = *(directionArray + rand() % 7 + 5);
 			}
 		}
-		if (direction.x < 0)
-		{
-			faceRight = false;
-		}
-		else
-		{
-			faceRight = true;
-		}
-
 		body.move(direction * speed * deltaTime);
 	}
-
+	if (direction.x <= 0)
+	{
+		faceRight = false;
+	}
+	else
+	{
+		faceRight = true;
+	}
 	animation.update(row, deltaTime, faceRight, rightSideUp);
 	body.setTextureRect(animation.uvRect);
 }
@@ -189,9 +202,24 @@ void Bug::setCaught(bool caught)
 	this->caught = caught;
 }
 
+void Bug::setPosition(float x, float y)
+{
+	body.setPosition(x, y);
+}
+
 bool Bug::isCaught() const
 {
 	return caught;
+}
+
+void Bug::flee()
+{
+	fleeing = true;
+}
+
+bool Bug::isFleeing() const
+{
+	return fleeing;
 }
 
 std::ostream& operator<<(std::ostream& out, const Bug& c)

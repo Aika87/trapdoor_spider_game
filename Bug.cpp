@@ -9,7 +9,7 @@ static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().wid
 static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
 static const sf::Vector2f BURROW(98.0f * WINDOW_WIDTH / 160.0f, 53.0f * WINDOW_HEIGHT / 90.0f);
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray) :
+Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
 {
 	this->speed = speed;
@@ -24,7 +24,7 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 
 }
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray) :
+Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
 {
 
@@ -33,54 +33,214 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 	caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
 
-	unsigned int ranCode = rand() % 8;
+	// level must determine sprite and speed: 
+	// level 1: 100% worms speed 2
+	// level 2: 75% worms speed 2, 25% worms speed 3
+	// level 3: 25% worms speed 2, 50% worms speed 3, 25% lady speed 4
+	// level 4: 25% worms speed 3, 50% lady speed 4, 25% lady speed 5
+	// level 5: 25% lady speed 4, 50% lady speed 5, 25% beetle speed 6
+	// level 6: 25% lady speed 5, 50% beetle speed 6, 25% beetle speed 7
+	// level 7: 25% beetle speed 6, 50% beetle speed 7, 25% beetle speed 8
+	// level 8: 50% beetle speed 7, 50% beetle speed 8
+	// level 9: 100% beetle speed 8
+	// after 10 it should be a beetle whose speed = level * 10
 
-	switch (ranCode)
+	unsigned int ranCode = rand() % 4;
+
+	switch (level)
 	{
-	case 0:
-		row = 0; // beetle
-		health = 5;
-		this->speed = 500.0f;
-		break;
-	case 1:
-		row = 0; // beetle
-		health = 6;
-		this->speed = 600.0f;
-		break;
-	case 2:
-		row = 0; // beetle
-		health = 7;
-		this->speed = 700.0f;
-		break;
-	case 3:
-		row = 1; // ladybug
-		health = 3;
-		this->speed = 300.0f;
-		break;
-	case 4:
-		row = 1; // ladybug
-		health = 4;
-		this->speed = 400.0f;
-		break;
-	case 5:
-		row = 1; // ladybug
-		health = 5;
-		this->speed = 500.0f;
-		break;
-	case 6:
+	case 1:// level 1: 100% worms speed 2
 		row = 2; // worm
 		health = 2;
 		this->speed = 200.0f;
 		break;
-	case 7:
-		row = 2; // worm
-		health = 3;
-		this->speed = 300.0f;
+	case 2:// level 2: 75% worms speed 2, 25% worms speed 3
+		if (ranCode == 0)
+		{
+			row = 2; // worm
+			health = 3;
+			this->speed = 300.0f;
+		}
+		else
+		{
+			row = 2; // worm
+			health = 2;
+			this->speed = 200.0f;
+		}
+		break;
+	case 3:// level 3: 25% worms speed 2, 50% worms speed 3, 25% lady speed 4
+		if (ranCode == 0)
+		{
+			row = 2; // worm
+			health = 2;
+			this->speed = 200.0f;
+		}
+		else if (ranCode == 1)
+		{
+			row = 1; // ladybug
+			health = 4;
+			this->speed = 400.0f;
+		}
+		else
+		{
+			row = 2; // worm
+			health = 3;
+			this->speed = 300.0f;
+		}
+		break;
+	case 4:// level 4: 25% worms speed 3, 50% lady speed 4, 25% lady speed 5
+		if (ranCode == 0)
+		{
+			row = 2; // worm
+			health = 3;
+			this->speed = 300.0f;
+		}
+		else if (ranCode == 1)
+		{
+			row = 1; // ladybug
+			health = 5;
+			this->speed = 500.0f;
+		}
+		else
+		{
+			row = 1; // ladybug
+			health = 4;
+			this->speed = 400.0f;
+		}
+		break;
+	case 5:// level 5: 25% lady speed 4, 50% lady speed 5, 25% beetle speed 6
+		if (ranCode == 0)
+		{
+			row = 1; // ladybug
+			health = 4;
+			this->speed = 400.0f;
+		}
+		else if (ranCode == 1)
+		{
+			row = 0; // beetle
+			health = 6;
+			this->speed = 600.0f;
+		}
+		else
+		{
+			row = 1; // ladybug
+			health = 5;
+			this->speed = 500.0f;
+		}
+		break;
+	case 6:// level 6: 25% lady speed 5, 50% beetle speed 6, 25% beetle speed 7
+		if (ranCode == 0)
+		{
+			row = 1; // ladybug
+			health = 5;
+			this->speed = 500.0f;
+		}
+		else if (ranCode == 1)
+		{
+			row = 0; // beetle
+			health = 7;
+			this->speed = 700.0f;
+		}
+		else
+		{
+			row = 0; // beetle
+			health = 6;
+			this->speed = 600.0f;
+		}
+		break;
+	case 7:// level 7: 25% beetle speed 6, 50% beetle speed 7, 25% beetle speed 8
+		if (ranCode == 0)
+		{
+			row = 0; // beetle
+			health = 6;
+			this->speed = 600.0f;
+		}
+		else if (ranCode == 1)
+		{
+			row = 0; // beetle
+			health = 8;
+			this->speed = 800.0f;
+		}
+		else
+		{
+			row = 0; // beetle
+			health = 7;
+			this->speed = 700.0f;
+		}
+		break;
+	case 8:// level 8: 50% beetle speed 7, 50% beetle speed 8
+		if (ranCode > 2)
+		{
+			row = 0; // beetle
+			health = 7;
+			this->speed = 700.0f;
+		}
+		else
+		{
+			row = 0; // beetle
+			health = 8;
+			this->speed = 800.0f;
+		}
+		break;
+	case 9:// level 9: 100% beetle speed 8
+		row = 0; // beetle
+		health = 8;
+		this->speed = 800.0f;
 		break;
 	default:
-		std::cout << "Error: constructor failure." << std::endl;
 		break;
 	}
+
+
+
+	//unsigned int ranCode = rand() % 8;
+
+	//switch (ranCode)
+	//{
+	//case 0:
+	//	row = 0; // beetle
+	//	health = 5;
+	//	this->speed = 500.0f;
+	//	break;
+	//case 1:
+	//	row = 0; // beetle
+	//	health = 6;
+	//	this->speed = 600.0f;
+	//	break;
+	//case 2:
+	//	row = 0; // beetle
+	//	health = 7;
+	//	this->speed = 700.0f;
+	//	break;
+	//case 3:
+	//	row = 1; // ladybug
+	//	health = 3;
+	//	this->speed = 300.0f;
+	//	break;
+	//case 4:
+	//	row = 1; // ladybug
+	//	health = 4;
+	//	this->speed = 400.0f;
+	//	break;
+	//case 5:
+	//	row = 1; // ladybug
+	//	health = 5;
+	//	this->speed = 500.0f;
+	//	break;
+	//case 6:
+	//	row = 2; // worm
+	//	health = 2;
+	//	this->speed = 200.0f;
+	//	break;
+	//case 7:
+	//	row = 2; // worm
+	//	health = 3;
+	//	this->speed = 300.0f;
+	//	break;
+	//default:
+	//	std::cout << "Error: constructor failure." << std::endl;
+	//	break;
+	//}
 
 	switchTime = 100.0f / speed;
 	animation.setSwitchTime(switchTime);

@@ -20,9 +20,8 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Trapdoor", sf::Style::Default);
 	window.setVerticalSyncEnabled(true);
 
-
 	srand(unsigned int(time(NULL)));
-	enum state {TITLE, IN_GAME, GAME_OVER};
+	enum state { TITLE, IN_GAME, GAME_OVER };
 
 	sf::Vector2f unitCircle[16]{ // each direction (up, down, left, right) has 7 options
 		sf::Vector2f(1.0f, 0.0f), // 0 degrees, 0pi
@@ -47,34 +46,66 @@ int main()
 	// goes from left to right
 	int webStrandCount = 5;
 	sf::FloatRect webStrands[5]{
-		// left
-		sf::FloatRect(40.0f * WINDOW_WIDTH / 160.0f,
-			52.0f * WINDOW_HEIGHT / 90.0f,
-			30.0f * WINDOW_WIDTH / 160.0f,
-			5.0f * WINDOW_HEIGHT / 90.0f),
-		// down left
-		sf::FloatRect(62.0f * WINDOW_WIDTH / 160.0f,
-			60.0f * WINDOW_HEIGHT / 90.0f,
-			17.0f * WINDOW_WIDTH / 160.0f,
-			7.0f * WINDOW_HEIGHT / 90.0f),
-		// down
-		sf::FloatRect(94.0f * WINDOW_WIDTH / 160.0f,
-			60.0f * WINDOW_HEIGHT / 90.0f,
-			7.0f * WINDOW_WIDTH / 160.0f,
-			10.0f * WINDOW_HEIGHT / 90.0f),
-		// down right
-		sf::FloatRect(111.0f * WINDOW_WIDTH / 160.0f,
-			60.0f * WINDOW_HEIGHT / 90.0f,
-			22.0f * WINDOW_WIDTH / 160.0f,
-			6.0f * WINDOW_HEIGHT / 90.0f),
-		// right
-		sf::FloatRect(125.0f * WINDOW_WIDTH / 160.0f,
-			52.0f * WINDOW_HEIGHT / 90.0f,
-			25.0f * WINDOW_WIDTH / 160.0f,
-			3.0f * WINDOW_HEIGHT / 90.0f),
+	// left
+	sf::FloatRect(40.0f * WINDOW_WIDTH / 160.0f,
+		52.0f * WINDOW_HEIGHT / 90.0f,
+		30.0f * WINDOW_WIDTH / 160.0f,
+		5.0f * WINDOW_HEIGHT / 90.0f),
+	// down left
+	sf::FloatRect(62.0f * WINDOW_WIDTH / 160.0f,
+		60.0f * WINDOW_HEIGHT / 90.0f,
+		17.0f * WINDOW_WIDTH / 160.0f,
+		7.0f * WINDOW_HEIGHT / 90.0f),
+	// down
+	sf::FloatRect(94.0f * WINDOW_WIDTH / 160.0f,
+		60.0f * WINDOW_HEIGHT / 90.0f,
+		7.0f * WINDOW_WIDTH / 160.0f,
+		10.0f * WINDOW_HEIGHT / 90.0f),
+	// down right
+	sf::FloatRect(111.0f * WINDOW_WIDTH / 160.0f,
+		60.0f * WINDOW_HEIGHT / 90.0f,
+		22.0f * WINDOW_WIDTH / 160.0f,
+		6.0f * WINDOW_HEIGHT / 90.0f),
+	// right
+	sf::FloatRect(125.0f * WINDOW_WIDTH / 160.0f,
+		52.0f * WINDOW_HEIGHT / 90.0f,
+		25.0f * WINDOW_WIDTH / 160.0f,
+		3.0f * WINDOW_HEIGHT / 90.0f),
 	};
 
-sf::Texture bg;
+
+	/********************SOUNDS********************/
+
+	sf::SoundBuffer gameOverBuffer;
+	gameOverBuffer.loadFromFile("sound/gameOver.wav");
+	sf::Sound gameOverSound;
+	gameOverSound.setBuffer(gameOverBuffer);
+
+	sf::SoundBuffer bugCaughtBuffer;
+	bugCaughtBuffer.loadFromFile("sound/bugSound3.wav");
+	sf::Sound bugCaughtSound;
+	bugCaughtSound.setBuffer(bugCaughtBuffer);
+
+	sf::SoundBuffer lungeBuffer[8];
+	sf::Sound lungeSound[8];
+	for (int i = 0; i < 8; ++i)
+	{
+		lungeBuffer[i].loadFromFile("sound/lunge" + std::to_string(i) + ".wav");
+		lungeSound[i].setBuffer(lungeBuffer[i]);
+	}
+
+	sf::SoundBuffer healthBuffer[4];
+	sf::Sound healthSound[4];
+	for (int i = 0; i < 4; ++i)
+	{
+		healthBuffer[i].loadFromFile("sound/health" + std::to_string(i) + ".wav");
+		healthSound[i].setBuffer(healthBuffer[i]);
+	}
+
+
+	/*************TEXTURES AND SPRITES*************/
+
+	sf::Texture bg;
 	bg.loadFromFile("png/background.png");
 	sf::Sprite bgSprite;
 	bgSprite.setTexture(bg);
@@ -96,6 +127,28 @@ sf::Texture bg;
 	start.setPosition(61.0f * WINDOW_WIDTH / 160.0f, 45.0f * WINDOW_HEIGHT / 90.0f);
 	start.setScale(widthRatio, heightRatio);
 
+	sf::Texture scoreBgTexture;
+	scoreBgTexture.loadFromFile("png/scoreBg.png");
+	sf::Sprite scoreBg;
+	scoreBg.setTexture(scoreBgTexture);
+	scoreBg.setScale(5.0f, 5.0f);
+	scoreBg.setPosition(WINDOW_WIDTH - scoreBg.getGlobalBounds().width - 20, WINDOW_HEIGHT / 18.0f);
+
+	sf::Texture levelTexture;
+	levelTexture.loadFromFile("png/level.png");
+	sf::Sprite level;
+	level.setTexture(levelTexture);
+	level.setScale(5.0f, 5.0f);
+	level.setPosition(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 18.0f);
+
+	sf::Texture scoreTexture;
+	scoreTexture.loadFromFile("png/score.png");
+	sf::Texture digitTexture;
+	digitTexture.loadFromFile("png/digits.png");
+	int levelDifference = 20;
+	Score score(&scoreTexture, sf::Vector2u(10, 1), &digitTexture, sf::Vector2u(10, 1),
+		scoreBg.getGlobalBounds().width, scoreBg.getPosition(), level.getGlobalBounds().width, level.getPosition(), levelDifference);
+
 	sf::Texture bugTexture;
 	bugTexture.loadFromFile("png/bugs.png");
 	AnimatedButton titleBugs(&bugTexture, sf::Vector2u(4, 1), 0.5f);
@@ -107,7 +160,7 @@ sf::Texture bg;
 	std::vector<Bug> bugVector;
 	for (size_t i = 0; i < bugCount; ++i)
 	{
-		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
+		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle, 1));
 		std::cout << bugVector.at(i);
 	}
 
@@ -117,8 +170,6 @@ sf::Texture bg;
 	spider.setPosition(WINDOW_WIDTH * 34.0f / 160.0f, 
 		WINDOW_HEIGHT * 12.0f / 45.0f);
 	spider.setScale(widthRatio, heightRatio);
-
-	
 
 	sf::Texture healthTexture;
 	healthTexture.loadFromFile("png/health.png");
@@ -146,27 +197,6 @@ sf::Texture bg;
 	retry.setScale(widthRatio, heightRatio);
 	retry.setPosition(121.0f * WINDOW_WIDTH / 160.0f, 80.0f * WINDOW_HEIGHT / 90.0f);
 
-	sf::Texture scoreBgTexture;
-	scoreBgTexture.loadFromFile("png/scoreBg.png");
-	sf::Sprite scoreBg;
-	scoreBg.setTexture(scoreBgTexture);
-	scoreBg.setScale(5.0f, 5.0f);
-	scoreBg.setPosition(WINDOW_WIDTH - scoreBg.getGlobalBounds().width - 20, WINDOW_HEIGHT / 18.0f);
-
-	sf::Texture levelTexture;
-	levelTexture.loadFromFile("png/level.png");
-	sf::Sprite level;
-	level.setTexture(levelTexture);
-	level.setScale(5.0f, 5.0f);
-	level.setPosition(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 18.0f);
-
-	sf::Texture scoreTexture;
-	scoreTexture.loadFromFile("png/score.png");
-	sf::Texture digitTexture;
-	digitTexture.loadFromFile("png/digits.png");
-	Score score(&scoreTexture, sf::Vector2u(10, 1), &digitTexture, sf::Vector2u(10, 1),
-		scoreBg.getGlobalBounds().width, scoreBg.getPosition(), level.getGlobalBounds().width, level.getPosition(), 2000);
-
 	float deltaTime = 0.0f;
 	sf::Clock deltaClock; // time between frames
 	sf::Clock healthClock; // time between health decrements
@@ -175,6 +205,9 @@ sf::Texture bg;
 	bool delayed = false; // spider's switchTime has been extended
 	bool caughtBug = false; // spider has caught a bug
 	state gameState = TITLE;
+
+
+	/******************GAME LOOP******************/
 
 	while (window.isOpen())
 	{
@@ -200,6 +233,7 @@ sf::Texture bg;
 						if (event.key.code == sf::Keyboard::Return)
 						{
 							gameState = IN_GAME;
+							healthClock.restart();
 						}
 						break;
 					case IN_GAME:
@@ -207,9 +241,9 @@ sf::Texture bg;
 							(event.key.code == sf::Keyboard::Left ||
 							event.key.code == sf::Keyboard::A) &&
 							spider.getRow() > 0)
-							{
+						{
 							spider.shift(-1);
-							}
+						}
 						else if (!inLunge && 
 							(event.key.code == sf::Keyboard::Right ||
 							event.key.code == sf::Keyboard::D) &&
@@ -220,6 +254,8 @@ sf::Texture bg;
 						else if (event.key.code == sf::Keyboard::Space)
 						{
 							inLunge = true;
+							int ranCode = rand() % 8;
+							lungeSound[ranCode].play();
 						}
 						break;
 					case GAME_OVER:
@@ -237,7 +273,8 @@ sf::Texture bg;
 							bugVector.clear();
 							for (size_t i = 0; i < bugCount; ++i)
 							{
-								bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
+								bugVector.push_back(Bug(&bugTexture, 
+									sf::Vector2u(4, 3), 0.0f, unitCircle, score.getLevel()));
 								std::cout << bugVector.at(i);
 							}
 						}
@@ -274,6 +311,7 @@ sf::Texture bg;
 			if (curHealth <= 0)
 			{
 				gameState = GAME_OVER;
+				gameOverSound.play();
 			}
 			else 
 			{
@@ -305,15 +343,28 @@ sf::Texture bg;
 				{
 					healthClock.restart();
 					health.update(-1, deltaTime);
+					if (curHealth > 10)
+					{
+						healthSound[0].play();
+					}
+					else if (curHealth > 7)
+					{
+						healthSound[1].play();
+					}
+					else if (curHealth > 5)
+					{
+						healthSound[2].play();
+					}
+					else if (curHealth > 0)
+					{
+						healthSound[3].play();
+					}
 					cout << "Getting hungry. Health = " << health.getHealth() << endl;
 				}
-				if (!inLunge && bugCount < bugCountMin) // spawn new bug every three seconds when they get under a certain population
+				if (!inLunge && bugCount < bugCountMin)
 				{
-					while (bugVector.size() < bugCountMin)
-					{
-						bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle));
-						++bugCount;
-					}
+					bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle, score.getLevel()));
+					++bugCount;
 				}
 				for (size_t i = 0; i < bugCount; ++i)
 				{

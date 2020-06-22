@@ -7,7 +7,7 @@ using namespace std;
 
 static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().width / 3;
 static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
-static const sf::Vector2f BURROW(98.0f * WINDOW_WIDTH / 160.0f, 53.0f * WINDOW_HEIGHT / 90.0f);
+static const float BURROW = 95.0f * WINDOW_WIDTH / 160.0f;
 
 Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
@@ -15,8 +15,8 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 	this->speed = speed;
 	row = 0;
 	rightSideUp = faceRight = true;
-	fleeing = caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
+	state = WALKING;
 
 	body.setTexture(*texture);
 	body.setScale(5.0f, 5.0f);
@@ -27,10 +27,8 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
 {
-
 	faceRight = true;
 	rightSideUp = true;
-	caught = false;
 	direction = *(directionArray + (rand() % 16)); // direction can be any
 
 	// level must determine sprite and speed: 
@@ -191,61 +189,12 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		break;
 	}
 
-
-
-	//unsigned int ranCode = rand() % 8;
-
-	//switch (ranCode)
-	//{
-	//case 0:
-	//	row = 0; // beetle
-	//	health = 5;
-	//	this->speed = 500.0f;
-	//	break;
-	//case 1:
-	//	row = 0; // beetle
-	//	health = 6;
-	//	this->speed = 600.0f;
-	//	break;
-	//case 2:
-	//	row = 0; // beetle
-	//	health = 7;
-	//	this->speed = 700.0f;
-	//	break;
-	//case 3:
-	//	row = 1; // ladybug
-	//	health = 3;
-	//	this->speed = 300.0f;
-	//	break;
-	//case 4:
-	//	row = 1; // ladybug
-	//	health = 4;
-	//	this->speed = 400.0f;
-	//	break;
-	//case 5:
-	//	row = 1; // ladybug
-	//	health = 5;
-	//	this->speed = 500.0f;
-	//	break;
-	//case 6:
-	//	row = 2; // worm
-	//	health = 2;
-	//	this->speed = 200.0f;
-	//	break;
-	//case 7:
-	//	row = 2; // worm
-	//	health = 3;
-	//	this->speed = 300.0f;
-	//	break;
-	//default:
-	//	std::cout << "Error: constructor failure." << std::endl;
-	//	break;
-	//}
-
 	switchTime = 100.0f / speed;
 	animation.setSwitchTime(switchTime);
 	body.setTexture(*texture);
 	body.setScale(5.0f, 5.0f);
+
+	state = WALKING;
 
 	// set position anywhere inside the boundary
 	unsigned int topBound = 60 * WINDOW_HEIGHT / 90;
@@ -258,39 +207,9 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 	float posX = body.getPosition().x,
 		posY = body.getPosition().y;
 
-	// Collision - stay inside an 8 sided polygon with vertices at:
-	// (0, 50), (70, 50), (70, 60), (125, 60), (125, 50), (160, 50), (160, 90), (0, 90)
-	if (caught && rightSideUp)
+	switch (state)
 	{
-		// flip upsidedown
-		rightSideUp = false;
-		// switch time is shortened
-		animation.setSwitchTime(animation.getSwitchTime() / 5.0f);
-	}
-	else if (fleeing && !caught) // fleeing and not already in a fleeing direction
-	{
-		if (posX >= BURROW.x && (direction.x < 0.0f || direction.y < 0.0f)) // bug is to the right or directly underneath hatch, going left or up
-		{
-			// x must be negative, y must be less than or equal to zero
-			int randInt = rand() % 5 + 12; // indexes [12-15] and [0]
-			if (randInt == 16)
-			{
-				direction = *directionArray;
-			}
-			else
-			{
-				direction = *(directionArray + randInt);
-			}
-		}
-		else if (posX < BURROW.x && (direction.x > 0.0f || direction.y < 0.0f)) // bug is to the left of hatch, going right or up
-		{
-			// x must be positive, y must be less than or equal to zero
-			direction = *(directionArray + (rand() % 5 + 8)); // indexes [8-12]
-		}
-		body.move(direction * speed * deltaTime);
-	}
-	else if (!fleeing && !caught)
-	{
+	case WALKING:
 		if ((posY + body.getGlobalBounds().height) > WINDOW_HEIGHT) // against bottom border, go up
 		{
 			// negative y: indexes [9-15]
@@ -334,7 +253,39 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 			}
 		}
 		body.move(direction * speed * deltaTime);
+		break;
+	case FLEEING:
+		if (posX >= BURROW && (direction.x < 0.0f || direction.y < 0.0f)) // bug is to the right or directly underneath hatch, going left or up
+		{
+			// x must be negative, y must be less than or equal to zero
+			int randInt = rand() % 5 + 12; // indexes [12-15] and [0]
+			if (randInt == 16)
+			{
+				direction = *directionArray;
+			}
+			else
+			{
+				direction = *(directionArray + randInt);
+			}
+		}
+		else if (posX < BURROW && (direction.x > 0.0f || direction.y < 0.0f)) // bug is to the left of hatch, going right or up
+		{
+			// x must be positive, y must be less than or equal to zero
+			direction = *(directionArray + (rand() % 5 + 8)); // indexes [8-12]
+		}
+		body.move(direction * speed * deltaTime);
+		break;
+	case CAUGHT:
+		if (rightSideUp)
+		{
+			// flip upsidedown
+			rightSideUp = false;
+			// switch time is shortened
+			animation.setSwitchTime(animation.getSwitchTime() / 5.0f);
+		}
+		break;
 	}
+
 	if (direction.x <= 0)
 	{
 		faceRight = false;
@@ -345,41 +296,6 @@ void Bug::update(float deltaTime, sf::Vector2f* directionArray)
 	}
 	animation.update(row, deltaTime, faceRight, rightSideUp);
 	body.setTextureRect(animation.uvRect);
-}
-
-void Bug::draw(sf::RenderWindow& window)
-{
-	window.draw(body);
-}
-
-sf::FloatRect Bug::getGlobalBounds() const
-{
-	return body.getGlobalBounds();
-}
-
-void Bug::setCaught(bool caught)
-{
-	this->caught = caught;
-}
-
-void Bug::setPosition(float x, float y)
-{
-	body.setPosition(x, y);
-}
-
-bool Bug::isCaught() const
-{
-	return caught;
-}
-
-void Bug::flee()
-{
-	fleeing = true;
-}
-
-bool Bug::isFleeing() const
-{
-	return fleeing;
 }
 
 std::ostream& operator<<(std::ostream& out, const Bug& c)

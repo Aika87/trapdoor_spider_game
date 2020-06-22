@@ -5,7 +5,7 @@
 class Spider
 {
 public:
-	Spider(sf::Texture* texture, sf::Vector2u imageCount,
+	Spider(sf::Texture* texture, const sf::Vector2u& imageCount,
 		float switchTime);
 	~Spider();
 
@@ -28,13 +28,11 @@ public:
 		@param direction the direction to shift, -1 for left, 1 for right
 	*/
 	void shift(int direction);
-	unsigned int getRow() const;
 	sf::Vector2u getCurrentImage() const;
 	sf::FloatRect getGlobalBounds() const;
-	void setRow(unsigned int newRow);
 	void resetAnimation();
 
-	void draw(sf::RenderWindow& window);
+	void draw(sf::RenderWindow& window) const;
 	void setScale(float x, float y) { body.setScale(x, y); };
 	void setPosition(float x, float y) { body.setPosition(x, y); };
 

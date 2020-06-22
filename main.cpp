@@ -22,6 +22,7 @@ int main()
 
 	srand(unsigned int(time(NULL)));
 	enum state { TITLE, IN_GAME, GAME_OVER };
+	enum bugState { WALKING = 0, FLEEING = 1, CAUGHT = 2 };
 
 	sf::Vector2f unitCircle[16]{ // each direction (up, down, left, right) has 7 options
 		sf::Vector2f(1.0f, 0.0f), // 0 degrees, 0pi
@@ -82,7 +83,7 @@ int main()
 	gameOverSound.setBuffer(gameOverBuffer);
 
 	sf::SoundBuffer bugCaughtBuffer;
-	bugCaughtBuffer.loadFromFile("sound/bugSound3.wav");
+	bugCaughtBuffer.loadFromFile("sound/bugSound1.wav");
 	sf::Sound bugCaughtSound;
 	bugCaughtSound.setBuffer(bugCaughtBuffer);
 
@@ -155,8 +156,8 @@ int main()
 	titleBugs.setPosition(115.0f * WINDOW_WIDTH / 160.0f, 42.0f * WINDOW_HEIGHT / 90.0f);
 	titleBugs.setScale(widthRatio, heightRatio);
 
-	size_t bugCount = 5;
-	size_t bugCountMin = 5;
+	size_t bugCount = 3;
+	size_t bugCountMin = 3;
 	std::vector<Bug> bugVector;
 	for (size_t i = 0; i < bugCount; ++i)
 	{
@@ -240,14 +241,14 @@ int main()
 						if (!inLunge &&
 							(event.key.code == sf::Keyboard::Left ||
 							event.key.code == sf::Keyboard::A) &&
-							spider.getRow() > 0)
+							spider.getCurrentImage().y > 0)
 						{
 							spider.shift(-1);
 						}
 						else if (!inLunge && 
 							(event.key.code == sf::Keyboard::Right ||
 							event.key.code == sf::Keyboard::D) &&
-							spider.getRow() < 4)
+							spider.getCurrentImage().y < 4)
 						{
 							spider.shift(1);
 						}
@@ -317,7 +318,7 @@ int main()
 			{
 				if (inLunge)
 				{
-					unsigned int spiderRow = spider.getRow();
+					unsigned int spiderRow = spider.getCurrentImage().y;
 					// check if any of the bugs intersect the spider sprite (all directions)
 					for (size_t i = 0; i < bugCount; ++i) // check every bug
 					{
@@ -325,11 +326,12 @@ int main()
 						if (delayed && webStrands[spiderRow].intersects(bugRect)) // bug and spider are on the same strand, spider has reached 4th frame
 						{
 							caughtBug = true;
-							bugVector.at(i).setCaught(caughtBug);
+							bugVector.at(i).setState(CAUGHT);
+							bugCaughtSound.play();
 						}
 						else if (!webStrands[spiderRow].intersects(bugRect))
 						{
-							bugVector.at(i).flee();
+							bugVector.at(i).setState(FLEEING);
 						}
 					}
 					if (caughtBug && spider.getCurrentImage().x == 5)
@@ -370,7 +372,7 @@ int main()
 				{
 					auto bugIter = bugVector.begin() + i;
 					sf::FloatRect bugRect = bugIter->getGlobalBounds();
-					if (bugIter->isCaught() && spider.getCurrentImage().x == 5)
+					if (bugIter->getState() == CAUGHT && spider.getCurrentImage().x == 5)
 					{
 						int bugHealth = bugIter->getHealth();
 						health.update(bugHealth, deltaTime);
@@ -380,7 +382,7 @@ int main()
 						bugVector.erase(bugIter);
 						--bugCount;
 					}
-					else if (bugIter->isFleeing() && (bugRect.top > WINDOW_HEIGHT ||
+					else if (bugIter->getState() == FLEEING && (bugRect.top > WINDOW_HEIGHT ||
 						bugRect.left > WINDOW_WIDTH || bugRect.left + bugRect.width < 0.0f))
 					{
 						bugVector.erase(bugIter);

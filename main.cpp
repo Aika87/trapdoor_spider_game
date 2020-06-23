@@ -206,6 +206,7 @@ int main()
 	bool delayed = false; // spider's switchTime has been extended
 	bool caughtBug = false; // spider has caught a bug
 	state gameState = TITLE;
+	float healthInterval = 15.0f;
 
 
 	/******************GAME LOOP******************/
@@ -292,7 +293,6 @@ int main()
 						cout << "Used energy for lunge. Health = " << health.getHealth() << endl;
 					}
 					break;
-
 			}
 		}
 
@@ -341,7 +341,7 @@ int main()
 					}
 					inLunge = spider.lunge(deltaTime, &delayed);
 				}
-				if (healthClock.getElapsedTime().asSeconds() >= 20.0f) // decrement health every 20 seconds
+				if (healthClock.getElapsedTime().asSeconds() >= healthInterval) // decrement health every 15 seconds
 				{
 					healthClock.restart();
 					health.update(-1, deltaTime);
@@ -360,6 +360,10 @@ int main()
 					else if (curHealth > 0)
 					{
 						healthSound[3].play();
+					}
+					if (score.getLevel() <= 12)
+					{
+						healthInterval = 15.0f - score.getLevel();
 					}
 					cout << "Getting hungry. Health = " << health.getHealth() << endl;
 				}

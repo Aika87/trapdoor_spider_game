@@ -56,7 +56,7 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode == 0)
 		{
 			row = 2; // worm
-			health = 3;
+			health = 2;
 			this->speed = 300.0f;
 		}
 		else
@@ -76,13 +76,13 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		else if (ranCode == 1)
 		{
 			row = 1; // ladybug
-			health = 4;
+			health = 3;
 			this->speed = 400.0f;
 		}
 		else
 		{
 			row = 2; // worm
-			health = 3;
+			health = 2;
 			this->speed = 300.0f;
 		}
 		break;
@@ -90,19 +90,19 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode == 0)
 		{
 			row = 2; // worm
-			health = 3;
+			health = 2;
 			this->speed = 300.0f;
 		}
 		else if (ranCode == 1)
 		{
 			row = 1; // ladybug
-			health = 5;
+			health = 3;
 			this->speed = 500.0f;
 		}
 		else
 		{
 			row = 1; // ladybug
-			health = 4;
+			health = 3;
 			this->speed = 400.0f;
 		}
 		break;
@@ -110,19 +110,19 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode == 0)
 		{
 			row = 1; // ladybug
-			health = 4;
+			health = 3;
 			this->speed = 400.0f;
 		}
 		else if (ranCode == 1)
 		{
 			row = 0; // beetle
-			health = 6;
+			health = 4;
 			this->speed = 600.0f;
 		}
 		else
 		{
 			row = 1; // ladybug
-			health = 5;
+			health = 3;
 			this->speed = 500.0f;
 		}
 		break;
@@ -130,19 +130,19 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode == 0)
 		{
 			row = 1; // ladybug
-			health = 5;
+			health = 3;
 			this->speed = 500.0f;
 		}
 		else if (ranCode == 1)
 		{
 			row = 0; // beetle
-			health = 7;
+			health = 4;
 			this->speed = 700.0f;
 		}
 		else
 		{
 			row = 0; // beetle
-			health = 6;
+			health = 4;
 			this->speed = 600.0f;
 		}
 		break;
@@ -150,19 +150,19 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode == 0)
 		{
 			row = 0; // beetle
-			health = 6;
+			health = 4;
 			this->speed = 600.0f;
 		}
 		else if (ranCode == 1)
 		{
 			row = 0; // beetle
-			health = 8;
+			health = 4;
 			this->speed = 800.0f;
 		}
 		else
 		{
 			row = 0; // beetle
-			health = 7;
+			health = 4;
 			this->speed = 700.0f;
 		}
 		break;
@@ -170,19 +170,19 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 		if (ranCode > 2)
 		{
 			row = 0; // beetle
-			health = 7;
+			health = 4;
 			this->speed = 700.0f;
 		}
 		else
 		{
 			row = 0; // beetle
-			health = 8;
+			health = 4;
 			this->speed = 800.0f;
 		}
 		break;
 	case 9:// level 9: 100% beetle speed 8
 		row = 0; // beetle
-		health = 8;
+		health = 4;
 		this->speed = 800.0f;
 		break;
 	default:

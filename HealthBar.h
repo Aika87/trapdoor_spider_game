@@ -1,11 +1,12 @@
 #pragma once
 #include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
 #include "Animation.h"
 
 class HealthBar
 {
 public:
-	HealthBar(sf::Texture* texture, sf::Vector2u imageCount,
+	HealthBar(sf::Texture* texture, const sf::Vector2u& imageCount,
 		float switchTime);
 
 	int getHealth() const;

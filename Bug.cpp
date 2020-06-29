@@ -9,7 +9,7 @@ static const unsigned int WINDOW_WIDTH = 2 * sf::VideoMode::getDesktopMode().wid
 static const unsigned int WINDOW_HEIGHT = 2 * sf::VideoMode::getDesktopMode().height / 3;
 static const float BURROW = 95.0f * WINDOW_WIDTH / 160.0f;
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level) :
+Bug::Bug(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
 {
 	this->speed = speed;
@@ -24,7 +24,7 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float 
 
 }
 
-Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray, int level) :
+Bug::Bug(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime, const sf::Vector2f* directionArray, int level) :
 	animation(texture, imageCount, switchTime)
 {
 	faceRight = true;
@@ -202,7 +202,7 @@ Bug::Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const 
 
 }
 
-void Bug::update(float deltaTime, sf::Vector2f* directionArray)
+void Bug::update(float deltaTime, const sf::Vector2f* directionArray)
 {
 	float posX = body.getPosition().x,
 		posY = body.getPosition().y;

@@ -9,15 +9,15 @@ class Bug
 {
 public:
 
-	Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level);
-	Bug(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, const sf::Vector2f* directionArray, int level); // randomized values
+	Bug(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime, float speed, const sf::Vector2f* directionArray, int level);
+	Bug(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime, const sf::Vector2f* directionArray, int level); // randomized values
 
-	void update(float deltaTime, sf::Vector2f* directionArray);
+	void update(float deltaTime, const sf::Vector2f* directionArray);
 	void draw(sf::RenderWindow& window) { window.draw(body); };
 	sf::FloatRect getGlobalBounds() const { return body.getGlobalBounds(); };
 	int getHealth() const { return health; };
 	void setState(int n) { state = bugState(n); };
-	bugState getState() { return state; };
+	bugState getState() const { return state; };
 
 	friend std::ostream& operator<<(std::ostream& out, const Bug& c);
 

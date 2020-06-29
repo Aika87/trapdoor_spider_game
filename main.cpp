@@ -162,7 +162,6 @@ int main()
 	for (size_t i = 0; i < bugCount; ++i)
 	{
 		bugVector.push_back(Bug(&bugTexture, sf::Vector2u(4, 3), 0.0f, unitCircle, 1));
-		std::cout << bugVector.at(i);
 	}
 
 	sf::Texture spiderTexture;

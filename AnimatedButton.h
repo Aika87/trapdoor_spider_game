@@ -5,7 +5,7 @@
 class AnimatedButton
 {
 public:
-	AnimatedButton(sf::Texture* texture, sf::Vector2u imageCount, float switchTime);
+	AnimatedButton(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime);
 
 	void setPosition(float x, float y);
 	void setScale(float x, float y);

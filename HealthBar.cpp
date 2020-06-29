@@ -1,6 +1,6 @@
 #include "HealthBar.h"
 
-HealthBar::HealthBar(sf::Texture* texture, sf::Vector2u imageCount,
+HealthBar::HealthBar(sf::Texture* texture, const sf::Vector2u& imageCount,
 	float switchTime) :
 	animation(texture, imageCount, switchTime)
 {
@@ -27,7 +27,6 @@ void HealthBar::update(int health, float deltaTime)
 	if (this->health <= 0) // game over, health is gone
 	{
 		animation.setCurrentImage(sf::Vector2u(15, 0));
-		//TODO: create game over method
 	}
 	else if (this->health >= 15) // health restored fully
 	{

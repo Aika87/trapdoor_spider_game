@@ -1,6 +1,6 @@
 #include "AnimatedButton.h"
 
-AnimatedButton::AnimatedButton(sf::Texture* texture, sf::Vector2u imageCount, float switchTime) :
+AnimatedButton::AnimatedButton(sf::Texture* texture, const sf::Vector2u& imageCount, float switchTime) :
 	animation(texture, imageCount, switchTime)
 {
 	body.setTexture(*texture);
